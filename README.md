@@ -1,10 +1,10 @@
-# Repo Name
+# Gnosis Slack App
 
  [![Discord](https://dcbadge.vercel.app/api/server/xWRaCDBtW4?style=flat)](https://discord.gg/xWRaCDBtW4)
 
- > any other repository badges can be added here.
+This is a Slack application that allows you to query our Gnosis service directly from your Slack workspace.
 
-A repository template for open-source demos, guides and sample apps. Description here.
+Currently the application is in private beta during our early development stages. Stay tuned for an announcement in our community when this is publicly available for use!
 
 ## Getting an API Key
 
