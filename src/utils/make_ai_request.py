@@ -4,6 +4,20 @@ from utils.logger import logger
 from json import dumps
 
 def make_ai_request(app, messages):
+    """
+    Makes a request to the Gnosis AI API with the provided Slack messages. Will transform the messages
+    into the standard { role, content } format most LLMs use. If the message was authored by this bot's user,
+    the role is "assistant", otherwise it is "user".
+
+    Args:
+        app: The Slack app instance.
+        messages: The messages to include in the AI query.
+
+    Returns:
+        str: The AI's response to the query. If there is an error, a default error message is returned.
+    Raises:
+        Exception: If there is an error making the request or processing the response.
+    """
     try:
         # If the message author is U08KECNAEP9, { role: "assistant" } else { role: "user" }
         mapped_messages = map(
