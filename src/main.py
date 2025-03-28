@@ -18,7 +18,7 @@ def callback(message, body, say):
     if message["channel_type"] == "im":
         if "thread_ts" in message and message["thread_ts"] is not None:
             logger(app, f"Processing IM message in thread: {message}")
-            process_thread_response(message, body, say)
+            process_thread_response(app, message, body, say)
         else:
             logger(app, f"Processing IM message outside of thread: {message}")
             process_dm_message(message, body, say)
@@ -27,7 +27,7 @@ def callback(message, body, say):
             return
         if "thread_ts" in message and message["thread_ts"] is not None:
             logger(app, f"Processing at-mention in thread: {message}")
-            process_thread_response(message, body, say)
+            process_thread_response(app, message, body, say)
         else:
             logger(app, f"Processing at-mention outside of thread: {message}")
             process_mention(message, body, say)
