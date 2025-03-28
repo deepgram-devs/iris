@@ -1,7 +1,7 @@
 from utils.make_ai_request import make_ai_request
 from utils.logger import logger
 
-def process_mention(app, message, body, say):
+def process_mention(app, message, say):
     try:
         response = make_ai_request(app, [message])
         say(text=response, thread_ts=message["ts"])

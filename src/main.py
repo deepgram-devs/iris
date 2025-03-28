@@ -11,27 +11,27 @@ app = App(
 )
 
 @app.event("message")
-def callback(message, body, say):
+def callback(message, say):
     try:
         if "subtype" in message and message["subtype"] != "message_replied":
             return
-        uuid = "<@U08KECNAEP9>"
+        uuid = "<@" + environ.get("BOT_USER_ID") + ">"
         if message["channel_type"] == "im":
             if "thread_ts" in message and message["thread_ts"] is not None:
                 logger(app, f"Processing IM message in thread: {message}")
-                process_thread_response(app, message, body, say)
+                process_thread_response(app, message, say)
             else:
                 logger(app, f"Processing IM message outside of thread: {message}")
-                process_dm_message(app, message, body, say)
+                process_dm_message(app, message, say)
         elif message["channel_type"] == "channel" or message["channel_type"] == "mpim" or message["channel_type"] == "group":
             if uuid not in message["text"]:
                 return
             if "thread_ts" in message and message["thread_ts"] is not None:
                 logger(app, f"Processing at-mention in thread: {message}")
-                process_thread_response(app, message, body, say)
+                process_thread_response(app, message, say)
             else:
                 logger(app, f"Processing at-mention outside of thread: {message}")
-                process_mention(app, message, body, say)
+                process_mention(app, message, say)
     except Exception as e:
         logger(app, f"Error processing message: {e}")
 
