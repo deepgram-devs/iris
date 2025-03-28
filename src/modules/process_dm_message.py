@@ -1,2 +1,5 @@
-def process_dm_message(message, body, say):
-    say(text=f"I see you in this dm!", thread_ts=message["ts"])
+from utils.make_ai_request import make_ai_request
+
+def process_dm_message(app, message, body, say):
+    response = make_ai_request(app, [message])
+    say(text=response, thread_ts=message["ts"])

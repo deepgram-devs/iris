@@ -21,7 +21,7 @@ def callback(message, body, say):
             process_thread_response(app, message, body, say)
         else:
             logger(app, f"Processing IM message outside of thread: {message}")
-            process_dm_message(message, body, say)
+            process_dm_message(app, message, body, say)
     elif message["channel_type"] == "channel" or message["channel_type"] == "mpim" or message["channel_type"] == "group":
         if uuid not in message["text"]:
             return
@@ -30,7 +30,7 @@ def callback(message, body, say):
             process_thread_response(app, message, body, say)
         else:
             logger(app, f"Processing at-mention outside of thread: {message}")
-            process_mention(message, body, say)
+            process_mention(app, message, body, say)
 
 if __name__ == "__main__":
     app.start(port=int(environ.get("PORT", 3000)))
