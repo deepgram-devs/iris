@@ -1,0 +1,7 @@
+fly.toml
+fly-stg.toml
+.github
+images
+.git
+*.md
+*.env
