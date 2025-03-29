@@ -1,4 +1,4 @@
-import pytest
+# pylint: disable=C0116
 from modules.process_thread_response import process_thread_response
 
 def test_success(mocker):

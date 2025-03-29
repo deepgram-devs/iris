@@ -13,6 +13,9 @@ app = App(
 
 @app.event("message")
 def callback(message, say):
+    """
+        Wrapper for the event listener. Passes the message and say function to the handle_message function.
+    """
     handle_message(app, message, say)
 
 if __name__ == "__main__":

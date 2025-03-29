@@ -1,3 +1,4 @@
+# pylint: disable=C0116
 from utils.fetch_thread_messages import fetch_thread_messages
 
 def test_success(mocker):

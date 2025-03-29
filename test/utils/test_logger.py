@@ -1,5 +1,6 @@
-from utils.logger import logger
+# pylint: disable=C0116
 from os import environ
+from utils.logger import logger
 
 def test_success(mocker):
     environ["LOG_CHANNEL"] = "C123456"

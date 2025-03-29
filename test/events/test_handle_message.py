@@ -1,5 +1,6 @@
-from events.handle_message import handle_message
+# pylint: disable=C0116
 from os import environ
+from events.handle_message import handle_message
 
 def test_invalid_subtype(mocker):
     environ["BOT_USER_ID"] = "U12345"
@@ -31,15 +32,10 @@ def test_exception(mocker):
     mocker.patch("events.handle_message.process_thread_response", mock_thread_response)
     mock_logger = mocker.Mock()
     mocker.patch("events.handle_message.logger", mock_logger)
-    mock_message = {
-        "channel_type": "im",
-        "text": "<@U12345> Hello!",
-        "thread_ts": None,
-    }
     mock_say = mocker.Mock()
     mock_app = mocker.Mock()
-    handle_message(mock_app, None, None)
-    assert not any([mock_dm_response.called, mock_mention_response.called, mock_thread_response.called])
+    handle_message(mock_app, None, mock_say)
+    assert not any([mock_dm_response.called, mock_mention_response.called, mock_thread_response.called, mock_say.called])
     mock_logger.assert_called_with(
         mock_app, "Error processing message: argument of type 'NoneType' is not iterable"
     )

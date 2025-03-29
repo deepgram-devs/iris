@@ -1,3 +1,4 @@
+# pylint: disable=C0116
 from os import environ
 from json import dumps
 from utils.make_ai_request import make_ai_request

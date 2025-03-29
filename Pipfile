@@ -3,6 +3,10 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
+[scripts]
+lint = "pylint src test"
+test = "pytest --cov-report term --cov=src test/ --cov-fail-under 90 --cov-config .coveragerc"
+
 [packages]
 slack-bolt = "*"
 requests = "*"

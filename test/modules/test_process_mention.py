@@ -1,4 +1,4 @@
-import pytest
+# pylint: disable=C0116
 from modules.process_mention import process_mention
 
 def test_success(mocker):

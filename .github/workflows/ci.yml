@@ -27,7 +27,7 @@ jobs:
         run: pipenv install --dev
 
       - name: Run linter
-        run: pipenv run pylint src
+        run: pipenv run lint
 
       - name: Run tests
-        run: pipenv run pytest --cov-report term --cov=src test/ --cov-fail-under 90 --cov-config .coveragerc
+        run: pipenv run test
