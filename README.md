@@ -37,6 +37,8 @@ Additionally, all changes should include comprehensive test coverage. Total cove
 pipenv run test
 ```
 
+When installing new dependencies, we expect that all packages are pinned to a specific version. You should not have any `package = "*"` lines in the Pipfile.
+
 ## Getting an API Key
 
 🔑 To access the Deepgram API you will need a [free Deepgram API Key](https://console.deepgram.com/signup?jump=keys).

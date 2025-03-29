@@ -21,6 +21,14 @@ jobs:
           cache: pipenv
           cache-dependency-path: Pipfile.lock
       
+      - name: Check dependencies are pinned
+        run: |
+          result=$(cat Pipfile | grep "*" | wc -l)
+          if [ $result -gt 0 ]; then
+            echo "Pipfile contains unpinned dependencies. Please pin all dependencies."
+            exit 1
+          fi
+      
       - name: Install dependencies
         run: pipenv install --dev
 

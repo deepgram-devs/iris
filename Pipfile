@@ -12,16 +12,16 @@ start = "python3 src/main.py"
 dev = "pymon src/main.py"
 
 [packages]
-slack-bolt = "*"
-requests = "*"
+slack-bolt = "1.23.0"
+requests = "2.32.3"
 
 [dev-packages]
-pylint = "*"
-pytest = "*"
-pytest-mock = "*"
-pytest-cov = "*"
-black = "*"
-py-mon = "*"
+pylint = "3.3.6"
+pytest = "8.3.5"
+pytest-mock = "3.14.0"
+pytest-cov = "6.0.0"
+black = "25.1.0"
+py-mon = "2.0.5"
 
 [requires]
 python_version = "3.13"
