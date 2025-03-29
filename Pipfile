@@ -8,6 +8,8 @@ lint = "pylint src test"
 format_check = "black --check --diff src test"
 format = "black src test"
 test = "pytest --cov-report term --cov=src test/ --cov-fail-under 90 --cov-config .coveragerc"
+start = "python3 src/main.py"
+dev = "pymon src/main.py"
 
 [packages]
 slack-bolt = "*"
@@ -19,6 +21,7 @@ pytest = "*"
 pytest-mock = "*"
 pytest-cov = "*"
 black = "*"
+py-mon = "*"
 
 [requires]
 python_version = "3.13"
