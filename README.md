@@ -6,6 +6,37 @@ This is a Slack application that allows you to query our Gnosis service directly
 
 Currently the application is in private beta during our early development stages. Stay tuned for an announcement in our community when this is publicly available for use!
 
+## Development
+
+> [!TIP]
+> We use the 1Password CLI to manage secrets. If you do not have a 1Password account, you will want to install and load the `python-dotenv` package.
+
+To get started, clone the repository and install the dependencies:
+
+```py
+pipenv install --dev
+```
+
+Then you can start the application in development (watch) mode:
+
+```py
+pipenv run dev
+```
+
+We expect that all contributions pass our linter and formatting requirements:
+
+```py
+pipenv run lint
+pipenv run format # To automatically format all files
+pipenv run format_check # To confirm formatting passes
+```
+
+Additionally, all changes should include comprehensive test coverage. Total coverage should never dip below 90%.
+
+```py
+pipenv run test
+```
+
 ## Getting an API Key
 
 🔑 To access the Deepgram API you will need a [free Deepgram API Key](https://console.deepgram.com/signup?jump=keys).
