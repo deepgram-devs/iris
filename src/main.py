@@ -1,3 +1,7 @@
+"""
+    Entry point for the Slack bot.
+    Mounts the "message" event listener, authenticates the bot, and starts the app.
+"""
 from os import environ
 from slack_bolt import App
 from modules.process_mention import process_mention
@@ -12,6 +16,12 @@ app = App(
 
 @app.event("message")
 def callback(message, say):
+    """
+        Message event listener. Checks if the message meets the criteria to trigger a response:
+            - Message must be in a DM with the bot OR
+            - Message must mention/tag the bot
+        Mounts the "message" event listener, authenticates the bot, and starts the app.
+    """
     try:
         if "subtype" in message and message["subtype"] != "message_replied":
             return
@@ -23,7 +33,11 @@ def callback(message, say):
             else:
                 logger(app, f"Processing IM message outside of thread: {message}")
                 process_dm_message(app, message, say)
-        elif message["channel_type"] == "channel" or message["channel_type"] == "mpim" or message["channel_type"] == "group":
+        elif (
+            message["channel_type"] == "channel"
+            or message["channel_type"] == "mpim"
+            or message["channel_type"] == "group"
+        ):
             if uuid not in message["text"]:
                 return
             if "thread_ts" in message and message["thread_ts"] is not None:

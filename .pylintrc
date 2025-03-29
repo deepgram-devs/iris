@@ -1,0 +1,4 @@
+[MESSAGES CONTROL]
+disable=
+    W0718,   # broad-exception-caught
+    C0114,  # missing-module-docstring

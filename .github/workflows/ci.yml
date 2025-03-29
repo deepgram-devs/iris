@@ -1,0 +1,30 @@
+# See https://fly.io/docs/app-guides/continuous-deployment-with-github-actions/
+
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  deploy:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up pipenv
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          cache: pipenv
+          cache-dependency-path: Pipfile.lock
+      
+      - name: Install dependencies
+        run: pipenv install --dev
+
+      - name: Run linter
+        run: pipenv run pylint src

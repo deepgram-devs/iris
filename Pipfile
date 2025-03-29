@@ -8,6 +8,7 @@ slack-bolt = "*"
 requests = "*"
 
 [dev-packages]
+pylint = "*"
 
 [requires]
 python_version = "3.13"
