@@ -30,4 +30,4 @@ jobs:
         run: pipenv run pylint src
 
       - name: Run tests
-        run: pipenv run pytest
+        run: pipenv run pytest --cov-report term --cov=src test/ --cov-fail-under 90 --cov-config .coveragerc
