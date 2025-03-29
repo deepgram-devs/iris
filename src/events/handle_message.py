@@ -36,5 +36,4 @@ def handle_message(app, message, say):
                 logger(app, f"Processing at-mention outside of thread: {message}")
                 process_mention(app, message, say)
     except Exception as e:
-        print(f"Error processing message: {e}")
         logger(app, f"Error processing message: {e}")
