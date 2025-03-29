@@ -26,6 +26,7 @@ def process_thread_response(app, message, say):
         result = make_ai_request(app, past_replies)
         say(text=result, thread_ts=message["thread_ts"])
     except Exception as e:
+        logger(app, f"Error processing thread response: {e}")
         say(
             text="Sorry, I couldn't process your request at the moment.",
             thread_ts=message["thread_ts"],
