@@ -28,3 +28,6 @@ jobs:
 
       - name: Run linter
         run: pipenv run pylint src
+
+      - name: Run tests
+        run: pipenv run pytest
