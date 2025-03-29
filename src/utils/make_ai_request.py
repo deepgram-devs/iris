@@ -3,6 +3,7 @@ from os import environ
 from requests import post
 from utils.logger import logger
 
+
 def make_ai_request(app, messages):
     """
     Makes a request to the Gnosis AI API with the provided Slack messages.
@@ -30,21 +31,23 @@ def make_ai_request(app, messages):
             messages,
         )
         # URL: https://gnosis.deepgram.com/v1/chat/completions
-        request = post(url="https://gnosis.deepgram.com/v1/chat/completions",
-            data=dumps({
-                "model": "gpt-4o",
-                "temperature": 1,
-                "response_format": {
-                    "type": "text"
-                },
-                "messages": list(mapped_messages),
-            }),
-        headers={
-            # pylint: disable=W0511
-            # TODO: Allow these to be set by each workspace via command + db
-            "authorization": "Bearer " + environ.get("GNOSIS_TOKEN"),
-        },
-        timeout=10,
+        request = post(
+            url="https://gnosis.deepgram.com/v1/chat/completions",
+            data=dumps(
+                {
+                    "model": "gpt-4o",
+                    "temperature": 1,
+                    "response_format": {"type": "text"},
+                    "messages": list(mapped_messages),
+                }
+            ),
+            headers={
+                # pylint: disable=W0511
+                # TODO: Allow these to be set by each workspace via command + db
+                "authorization": "Bearer "
+                + environ.get("GNOSIS_TOKEN"),
+            },
+            timeout=10,
         )
         response = request.json()
         if request.status_code != 200:

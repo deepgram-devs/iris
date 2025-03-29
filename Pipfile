@@ -5,6 +5,8 @@ name = "pypi"
 
 [scripts]
 lint = "pylint src test"
+format_check = "black --check --diff src test"
+format = "black src test"
 test = "pytest --cov-report term --cov=src test/ --cov-fail-under 90 --cov-config .coveragerc"
 
 [packages]
@@ -16,6 +18,7 @@ pylint = "*"
 pytest = "*"
 pytest-mock = "*"
 pytest-cov = "*"
+black = "*"
 
 [requires]
 python_version = "3.13"

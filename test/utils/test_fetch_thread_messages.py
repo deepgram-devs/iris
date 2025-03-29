@@ -1,6 +1,7 @@
 # pylint: disable=C0116
 from utils.fetch_thread_messages import fetch_thread_messages
 
+
 def test_success(mocker):
     mock_app = mocker.Mock()
     mock_app.client.conversations_replies.return_value = {
@@ -19,9 +20,10 @@ def test_success(mocker):
         {"ts": "1234567890.654321", "text": "Message 1"},
     ]
 
+
 def test_no_messages(mocker):
     mock_logger = mocker.Mock()
-    mocker.patch('utils.fetch_thread_messages.logger', mock_logger)
+    mocker.patch("utils.fetch_thread_messages.logger", mock_logger)
     mock_app = mocker.Mock()
     mock_app.client.conversations_replies.return_value = {"messages": []}
     result = fetch_thread_messages(mock_app, "C123456", "1234567890.123456")
@@ -35,9 +37,10 @@ def test_no_messages(mocker):
     )
     assert result is None
 
+
 def test_error(mocker):
     mock_logger = mocker.Mock()
-    mocker.patch('utils.fetch_thread_messages.logger', mock_logger)
+    mocker.patch("utils.fetch_thread_messages.logger", mock_logger)
     mock_app = mocker.Mock()
     mock_app.client.conversations_replies.side_effect = Exception("API Error")
     result = fetch_thread_messages(mock_app, "C123456", "1234567890.123456")

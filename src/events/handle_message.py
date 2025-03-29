@@ -4,11 +4,12 @@ from modules.process_dm_message import process_dm_message
 from modules.process_thread_response import process_thread_response
 from utils.logger import logger
 
+
 def handle_message(app, message, say):
     """
-        Message event listener. Checks if the message meets the criteria to trigger a response:
-            - Message must be in a DM with the bot OR
-            - Message must mention/tag the bot
+    Message event listener. Checks if the message meets the criteria to trigger a response:
+        - Message must be in a DM with the bot OR
+        - Message must mention/tag the bot
     """
     try:
         if "subtype" in message and message["subtype"] != "message_replied":

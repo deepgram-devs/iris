@@ -2,5 +2,4 @@
 disable=
     W0718,   # broad-exception-caught
     C0114,  # missing-module-docstring
-    C0301,  # line-too-long
     R0801,  # duplicate-code

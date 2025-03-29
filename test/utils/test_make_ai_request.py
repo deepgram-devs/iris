@@ -3,6 +3,7 @@ from os import environ
 from json import dumps
 from utils.make_ai_request import make_ai_request
 
+
 def test_success(mocker):
     environ["GNOSIS_TOKEN"] = "test_key"
     messages = [
@@ -13,9 +14,7 @@ def test_success(mocker):
     mock_response = mocker.Mock()
     mock_response.status_code = 200
     mock_response.json.return_value = {
-        "choices": [
-            {"message": {"content": "I'm good, thank you!"}}
-        ]
+        "choices": [{"message": {"content": "I'm good, thank you!"}}]
     }
     mock_post.return_value = mock_response
     app = mocker.Mock()
@@ -23,19 +22,25 @@ def test_success(mocker):
     assert response == "I'm good, thank you!"
     mock_post.assert_called_once_with(
         url="https://gnosis.deepgram.com/v1/chat/completions",
-        data=dumps({
+        data=dumps(
+            {
                 "model": "gpt-4o",
                 "temperature": 1,
-                "response_format": {
-                    "type": "text"
-                },
-                "messages": list([{ "role": "assistant", "content": "Hello, how are you?" }, { "role": "user", "content": "What is the weather like?" }])
-            }),
+                "response_format": {"type": "text"},
+                "messages": list(
+                    [
+                        {"role": "assistant", "content": "Hello, how are you?"},
+                        {"role": "user", "content": "What is the weather like?"},
+                    ]
+                ),
+            }
+        ),
         headers={
             "authorization": "Bearer test_key",
         },
         timeout=10,
     )
+
 
 def test_bad_status(mocker):
     environ["GNOSIS_TOKEN"] = "test_key"
@@ -57,20 +62,26 @@ def test_bad_status(mocker):
     assert response == "There was an error generating a response. Please notify Naomi."
     mock_post.assert_called_once_with(
         url="https://gnosis.deepgram.com/v1/chat/completions",
-        data=dumps({
+        data=dumps(
+            {
                 "model": "gpt-4o",
                 "temperature": 1,
-                "response_format": {
-                    "type": "text"
-                },
-                "messages": list([{ "role": "assistant", "content": "Hello, how are you?" }, { "role": "user", "content": "What is the weather like?" }])
-            }),
+                "response_format": {"type": "text"},
+                "messages": list(
+                    [
+                        {"role": "assistant", "content": "Hello, how are you?"},
+                        {"role": "user", "content": "What is the weather like?"},
+                    ]
+                ),
+            }
+        ),
         headers={
             "authorization": "Bearer test_key",
         },
         timeout=10,
     )
     mock_logger.assert_called_once_with(app, "GNOSIS Error: {'error': 'Unauthorized'}")
+
 
 def test_exception(mocker):
     environ["GNOSIS_TOKEN"] = "test_key"
@@ -87,14 +98,19 @@ def test_exception(mocker):
     assert response == "There was an error generating a response. Please notify Naomi."
     mock_post.assert_called_once_with(
         url="https://gnosis.deepgram.com/v1/chat/completions",
-        data=dumps({
+        data=dumps(
+            {
                 "model": "gpt-4o",
                 "temperature": 1,
-                "response_format": {
-                    "type": "text"
-                },
-                "messages": list([{ "role": "assistant", "content": "Hello, how are you?" }, { "role": "user", "content": "What is the weather like?" }])
-            }),
+                "response_format": {"type": "text"},
+                "messages": list(
+                    [
+                        {"role": "assistant", "content": "Hello, how are you?"},
+                        {"role": "user", "content": "What is the weather like?"},
+                    ]
+                ),
+            }
+        ),
         headers={
             "authorization": "Bearer test_key",
         },

@@ -2,6 +2,7 @@
 from os import environ
 from utils.logger import logger
 
+
 def test_success(mocker):
     environ["LOG_CHANNEL"] = "C123456"
     mock_app = mocker.Mock()
@@ -9,9 +10,9 @@ def test_success(mocker):
     message = "Test message"
     logger(mock_app, message)
     mock_app.client.chat_postMessage.assert_called_once_with(
-        channel="C123456",
-        text="```Test message```"
+        channel="C123456", text="```Test message```"
     )
+
 
 def test_no_log_channel(mocker):
     environ.pop("LOG_CHANNEL")

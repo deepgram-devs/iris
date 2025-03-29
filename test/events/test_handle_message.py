@@ -2,6 +2,7 @@
 from os import environ
 from events.handle_message import handle_message
 
+
 def test_invalid_subtype(mocker):
     environ["BOT_USER_ID"] = "U12345"
     mock_dm_response = mocker.Mock()
@@ -20,7 +21,14 @@ def test_invalid_subtype(mocker):
     mock_say = mocker.Mock()
     mock_app = mocker.Mock()
     handle_message(mock_app, mock_message, mock_say)
-    assert not any([mock_dm_response.called, mock_mention_response.called, mock_thread_response.called])
+    assert not any(
+        [
+            mock_dm_response.called,
+            mock_mention_response.called,
+            mock_thread_response.called,
+        ]
+    )
+
 
 def test_exception(mocker):
     environ["BOT_USER_ID"] = "U12345"
@@ -35,10 +43,19 @@ def test_exception(mocker):
     mock_say = mocker.Mock()
     mock_app = mocker.Mock()
     handle_message(mock_app, None, mock_say)
-    assert not any([mock_dm_response.called, mock_mention_response.called, mock_thread_response.called, mock_say.called])
-    mock_logger.assert_called_with(
-        mock_app, "Error processing message: argument of type 'NoneType' is not iterable"
+    assert not any(
+        [
+            mock_dm_response.called,
+            mock_mention_response.called,
+            mock_thread_response.called,
+            mock_say.called,
+        ]
     )
+    mock_logger.assert_called_with(
+        mock_app,
+        "Error processing message: argument of type 'NoneType' is not iterable",
+    )
+
 
 def test_dm_in_thread(mocker):
     environ["BOT_USER_ID"] = "U12345"
@@ -65,6 +82,7 @@ def test_dm_in_thread(mocker):
     mock_mention_response.assert_not_called()
     mock_dm_response.assert_not_called()
 
+
 def test_dm_no_thread(mocker):
     environ["BOT_USER_ID"] = "U12345"
     mock_dm_response = mocker.Mock()
@@ -88,6 +106,7 @@ def test_dm_no_thread(mocker):
     mock_dm_response.assert_called_once_with(mock_app, mock_message, mock_say)
     mock_mention_response.assert_not_called()
     mock_thread_response.assert_not_called()
+
 
 def test_dm_mention_in_thread(mocker):
     environ["BOT_USER_ID"] = "U12345"
@@ -114,6 +133,7 @@ def test_dm_mention_in_thread(mocker):
     mock_mention_response.assert_not_called()
     mock_dm_response.assert_not_called()
 
+
 def test_dm_mention_no_thread(mocker):
     environ["BOT_USER_ID"] = "U12345"
     mock_dm_response = mocker.Mock()
@@ -138,6 +158,7 @@ def test_dm_mention_no_thread(mocker):
     mock_mention_response.assert_not_called()
     mock_thread_response.assert_not_called()
 
+
 def test_mention_in_channel(mocker):
     environ["BOT_USER_ID"] = "U12345"
     mock_dm_response = mocker.Mock()
@@ -161,6 +182,7 @@ def test_mention_in_channel(mocker):
     mock_mention_response.assert_called_once_with(mock_app, mock_message, mock_say)
     mock_dm_response.assert_not_called()
     mock_thread_response.assert_not_called()
+
 
 def test_mention_in_channel_thread(mocker):
     environ["BOT_USER_ID"] = "U12345"
@@ -187,6 +209,7 @@ def test_mention_in_channel_thread(mocker):
     mock_dm_response.assert_not_called()
     mock_mention_response.assert_not_called()
 
+
 def test_mention_in_mpim(mocker):
     environ["BOT_USER_ID"] = "U12345"
     mock_dm_response = mocker.Mock()
@@ -210,6 +233,7 @@ def test_mention_in_mpim(mocker):
     mock_mention_response.assert_called_once_with(mock_app, mock_message, mock_say)
     mock_dm_response.assert_not_called()
     mock_thread_response.assert_not_called()
+
 
 def test_mention_in_mpim_thread(mocker):
     environ["BOT_USER_ID"] = "U12345"
@@ -236,6 +260,7 @@ def test_mention_in_mpim_thread(mocker):
     mock_dm_response.assert_not_called()
     mock_mention_response.assert_not_called()
 
+
 def test_mention_in_group(mocker):
     environ["BOT_USER_ID"] = "U12345"
     mock_dm_response = mocker.Mock()
@@ -259,6 +284,7 @@ def test_mention_in_group(mocker):
     mock_mention_response.assert_called_once_with(mock_app, mock_message, mock_say)
     mock_dm_response.assert_not_called()
     mock_thread_response.assert_not_called()
+
 
 def test_mention_in_group_thread(mocker):
     environ["BOT_USER_ID"] = "U12345"
@@ -285,6 +311,7 @@ def test_mention_in_group_thread(mocker):
     mock_dm_response.assert_not_called()
     mock_mention_response.assert_not_called()
 
+
 def test_no_mention_in_channel(mocker):
     environ["BOT_USER_ID"] = "U12345"
     mock_dm_response = mocker.Mock()
@@ -303,7 +330,14 @@ def test_no_mention_in_channel(mocker):
     mock_app = mocker.Mock()
     handle_message(mock_app, mock_message, mock_say)
     mock_logger.assert_not_called()
-    assert not any([mock_dm_response.called, mock_mention_response.called, mock_thread_response.called])
+    assert not any(
+        [
+            mock_dm_response.called,
+            mock_mention_response.called,
+            mock_thread_response.called,
+        ]
+    )
+
 
 def test_no_mention_in_channel_thread(mocker):
     environ["BOT_USER_ID"] = "U12345"
@@ -324,7 +358,14 @@ def test_no_mention_in_channel_thread(mocker):
     mock_app = mocker.Mock()
     handle_message(mock_app, mock_message, mock_say)
     mock_logger.assert_not_called()
-    assert not any([mock_dm_response.called, mock_mention_response.called, mock_thread_response.called])
+    assert not any(
+        [
+            mock_dm_response.called,
+            mock_mention_response.called,
+            mock_thread_response.called,
+        ]
+    )
+
 
 def test_no_mention_in_mpim(mocker):
     environ["BOT_USER_ID"] = "U12345"
@@ -348,6 +389,7 @@ def test_no_mention_in_mpim(mocker):
     mock_dm_response.assert_not_called()
     mock_thread_response.assert_not_called()
 
+
 def test_no_mention_in_mpim_thread(mocker):
     environ["BOT_USER_ID"] = "U12345"
     mock_dm_response = mocker.Mock()
@@ -367,7 +409,14 @@ def test_no_mention_in_mpim_thread(mocker):
     mock_app = mocker.Mock()
     handle_message(mock_app, mock_message, mock_say)
     mock_logger.assert_not_called()
-    assert not any([mock_dm_response.called, mock_mention_response.called, mock_thread_response.called])
+    assert not any(
+        [
+            mock_dm_response.called,
+            mock_mention_response.called,
+            mock_thread_response.called,
+        ]
+    )
+
 
 def test_no_mention_in_group(mocker):
     environ["BOT_USER_ID"] = "U12345"
@@ -387,7 +436,13 @@ def test_no_mention_in_group(mocker):
     mock_app = mocker.Mock()
     handle_message(mock_app, mock_message, mock_say)
     mock_logger.assert_not_called()
-    assert not any([mock_dm_response.called, mock_mention_response.called, mock_thread_response.called])
+    assert not any(
+        [
+            mock_dm_response.called,
+            mock_mention_response.called,
+            mock_thread_response.called,
+        ]
+    )
 
 
 def test_no_mention_in_group_thread(mocker):
@@ -409,4 +464,10 @@ def test_no_mention_in_group_thread(mocker):
     mock_app = mocker.Mock()
     handle_message(mock_app, mock_message, mock_say)
     mock_logger.assert_not_called()
-    assert not any([mock_dm_response.called, mock_mention_response.called, mock_thread_response.called])
+    assert not any(
+        [
+            mock_dm_response.called,
+            mock_mention_response.called,
+            mock_thread_response.called,
+        ]
+    )
