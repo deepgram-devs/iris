@@ -1,5 +1,6 @@
 from os import environ
 
+
 def logger(app, message):
     """
     Pipes a message to the slack channel specified in the LOG_CHANNEL environment variable.

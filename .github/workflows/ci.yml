@@ -1,0 +1,43 @@
+name: CI
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  deploy:
+    name: Lint and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install pipenv
+        run: pip install pipenv
+      
+      - name: Check dependencies are pinned
+        run: |
+          result=$(cat Pipfile | grep "*" | wc -l)
+          if [ $result -gt 0 ]; then
+            echo "Pipfile contains unpinned dependencies. Please pin all dependencies."
+            exit 1
+          fi
+      
+      - name: Install dependencies
+        run: pipenv install --dev
+
+      - name: Run linter
+        run: pipenv run lint
+
+      - name: Check Formatting
+        run: pipenv run format_check
+
+      - name: Run tests
+        run: pipenv run test

@@ -12,6 +12,9 @@ jobs:
     concurrency: deploy-group    # optional: ensure only one action runs at a time
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --config ./fly-stg.toml --dockerfile ./Dockerfile --remote-only
         env:
