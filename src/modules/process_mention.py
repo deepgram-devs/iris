@@ -18,7 +18,9 @@ def process_mention(app, message, say):
         Exception: If there is an error processing the message or sending the response.
     """
     try:
-        username = app.client.users_info(user=message["user"])["user"]["profile"]["display_name"]
+        username = app.client.users_info(user=message["user"])["user"]["profile"][
+            "display_name"
+        ]
         response = make_ai_request(app, [message], username, "Slack")
         say(text=response, thread_ts=message["ts"])
     except Exception as e:

@@ -10,7 +10,9 @@ def test_success(mocker):
     mock_user_request = mocker.Mock()
     mock_user_request.return_value = {"user": {"profile": {"display_name": "naomi"}}}
     mock_client = mocker.Mock(client=mocker.Mock(users_info=mock_user_request))
-    process_mention(mock_client, {"ts": 1, "user": "naomi", "text": "naomi"}, mocked_say)
+    process_mention(
+        mock_client, {"ts": 1, "user": "naomi", "text": "naomi"}, mocked_say
+    )
     mock_request.assert_called_once_with(
         mock_client, [{"ts": 1, "user": "naomi", "text": "naomi"}], "naomi", "Slack"
     )
@@ -27,7 +29,9 @@ def test_error(mocker):
     mock_user_request = mocker.Mock()
     mock_user_request.return_value = {"user": {"profile": {"display_name": "naomi"}}}
     mock_client = mocker.Mock(client=mocker.Mock(users_info=mock_user_request))
-    process_mention(mock_client, {"ts": 1, "user": "naomi", "text": "naomi"}, mocked_say)
+    process_mention(
+        mock_client, {"ts": 1, "user": "naomi", "text": "naomi"}, mocked_say
+    )
     mock_request.assert_called_once_with(
         mock_client, [{"ts": 1, "user": "naomi", "text": "naomi"}], "naomi", "Slack"
     )

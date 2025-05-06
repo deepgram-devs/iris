@@ -23,7 +23,9 @@ def process_thread_response(app, message, say):
         past_replies = fetch_thread_messages(
             app, message["channel"], message["thread_ts"]
         )
-        username = app.client.users_info(user=message["user"])["user"]["profile"]["display_name"]
+        username = app.client.users_info(user=message["user"])["user"]["profile"][
+            "display_name"
+        ]
         result = make_ai_request(app, past_replies, username, "Slack")
         say(text=result, thread_ts=message["thread_ts"])
     except Exception as e:

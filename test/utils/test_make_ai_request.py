@@ -29,8 +29,11 @@ def test_success(mocker):
                 "response_format": {"type": "text"},
                 "messages": list(
                     [
-                        #pylint: disable=C0301
-                        {"role": "system", "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters."},
+                        # pylint: disable=C0301
+                        {
+                            "role": "system",
+                            "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters.",
+                        },
                         {"role": "assistant", "content": "Hello, how are you?"},
                         {"role": "user", "content": "What is the weather like?"},
                     ]
@@ -71,8 +74,11 @@ def test_bad_status(mocker):
                 "response_format": {"type": "text"},
                 "messages": list(
                     [
-                        #pylint: disable=C0301
-                        {"role": "system", "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters."},
+                        # pylint: disable=C0301
+                        {
+                            "role": "system",
+                            "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters.",
+                        },
                         {"role": "assistant", "content": "Hello, how are you?"},
                         {"role": "user", "content": "What is the weather like?"},
                     ]
@@ -109,8 +115,11 @@ def test_exception(mocker):
                 "response_format": {"type": "text"},
                 "messages": list(
                     [
-                        #pylint: disable=C0301
-                        {"role": "system", "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters."},
+                        # pylint: disable=C0301
+                        {
+                            "role": "system",
+                            "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters.",
+                        },
                         {"role": "assistant", "content": "Hello, how are you?"},
                         {"role": "user", "content": "What is the weather like?"},
                     ]
