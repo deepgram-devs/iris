@@ -18,7 +18,7 @@ def test_success(mocker):
     }
     mock_post.return_value = mock_response
     app = mocker.Mock()
-    response = make_ai_request(app, messages)
+    response = make_ai_request(app, messages, "naomi", "Slack")
     assert response == "I'm good, thank you!"
     mock_post.assert_called_once_with(
         url="https://gnosis.deepgram.com/v1/chat/completions",
@@ -29,6 +29,8 @@ def test_success(mocker):
                 "response_format": {"type": "text"},
                 "messages": list(
                     [
+                        #pylint: disable=C0301
+                        {"role": "system", "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters."},
                         {"role": "assistant", "content": "Hello, how are you?"},
                         {"role": "user", "content": "What is the weather like?"},
                     ]
@@ -58,7 +60,7 @@ def test_bad_status(mocker):
     app = mocker.Mock()
     mock_logger = mocker.Mock()
     mocker.patch("utils.make_ai_request.logger", mock_logger)
-    response = make_ai_request(app, messages)
+    response = make_ai_request(app, messages, "naomi", "Slack")
     assert response == "There was an error generating a response. Please notify Naomi."
     mock_post.assert_called_once_with(
         url="https://gnosis.deepgram.com/v1/chat/completions",
@@ -69,6 +71,8 @@ def test_bad_status(mocker):
                 "response_format": {"type": "text"},
                 "messages": list(
                     [
+                        #pylint: disable=C0301
+                        {"role": "system", "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters."},
                         {"role": "assistant", "content": "Hello, how are you?"},
                         {"role": "user", "content": "What is the weather like?"},
                     ]
@@ -94,7 +98,7 @@ def test_exception(mocker):
     app = mocker.Mock()
     mock_logger = mocker.Mock()
     mocker.patch("utils.make_ai_request.logger", mock_logger)
-    response = make_ai_request(app, messages)
+    response = make_ai_request(app, messages, "naomi", "Slack")
     assert response == "There was an error generating a response. Please notify Naomi."
     mock_post.assert_called_once_with(
         url="https://gnosis.deepgram.com/v1/chat/completions",
@@ -105,6 +109,8 @@ def test_exception(mocker):
                 "response_format": {"type": "text"},
                 "messages": list(
                     [
+                        #pylint: disable=C0301
+                        {"role": "system", "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters."},
                         {"role": "assistant", "content": "Hello, how are you?"},
                         {"role": "user", "content": "What is the weather like?"},
                     ]
