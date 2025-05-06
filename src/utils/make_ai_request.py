@@ -3,8 +3,13 @@ from os import environ
 from requests import post
 from utils.logger import logger
 
+platformSyntax = {
+    "Slack": "<https://example.com|link description/text>",
+    "Discord": "[link description/text](https://example.com)",
+}
 
-def make_ai_request(app, messages, username):
+
+def make_ai_request(app, messages, username, platform):
     """
     Makes a request to the Gnosis AI API with the provided Slack messages.
     Will transform the messages into the standard { role, content }
@@ -34,7 +39,7 @@ def make_ai_request(app, messages, username):
         mapped_messages = [
             {
                 "role": "system",
-                "content": f"Your name is Iris. You are a Slack and Discord bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, {username}.",
+                "content": f"Your name is Iris. You are a {platform} bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, {username}. Remember that you must use the appropriate formatting for {platform}, so that your message renders correctly for the user. For example, links must be formatted as {platformSyntax[platform]}. Your responses should never exceed 2000 characters.",
             },
         ] + list(mapped_messages)
         # URL: https://gnosis.deepgram.com/v1/chat/completions

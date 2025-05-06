@@ -19,7 +19,7 @@ def process_dm_message(app, message, say):
     """
     try:
         username = app.client.users_info(user=message["user"])["user"]["profile"]["display_name"]
-        response = make_ai_request(app, [message], username)
+        response = make_ai_request(app, [message], username, "Slack")
         say(text=response, thread_ts=message["ts"])
     except Exception as e:
         logger(app, f"Error processing DM message: {e}")
