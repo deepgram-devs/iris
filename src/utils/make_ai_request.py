@@ -61,7 +61,7 @@ def make_ai_request(app, messages, username, platform):
                 "authorization": "Bearer "
                 + environ.get("GNOSIS_TOKEN"),
             },
-            timeout=10,
+            timeout=60,
         )
         response = request.json()
         if request.status_code != 200:
