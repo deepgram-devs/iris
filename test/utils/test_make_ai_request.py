@@ -43,7 +43,7 @@ def test_success(mocker):
         headers={
             "authorization": "Bearer test_key",
         },
-        timeout=10,
+        timeout=60,
     )
 
 
@@ -88,7 +88,7 @@ def test_bad_status(mocker):
         headers={
             "authorization": "Bearer test_key",
         },
-        timeout=10,
+        timeout=60,
     )
     mock_logger.assert_called_once_with(app, "GNOSIS Error: {'error': 'Unauthorized'}")
 
@@ -129,6 +129,6 @@ def test_exception(mocker):
         headers={
             "authorization": "Bearer test_key",
         },
-        timeout=10,
+        timeout=60,
     )
     mock_logger.assert_called_once_with(app, "Error making AI request: Network error")
