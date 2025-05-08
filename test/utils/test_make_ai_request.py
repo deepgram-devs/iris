@@ -2,6 +2,7 @@
 from os import environ
 from json import dumps
 from utils.make_ai_request import make_ai_request
+from utils.generate_prompt import generate_prompt
 
 
 def test_success(mocker):
@@ -32,7 +33,10 @@ def test_success(mocker):
                         # pylint: disable=C0301
                         {
                             "role": "system",
-                            "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters.",
+                            "content": generate_prompt(
+                                "naomi",
+                                "Slack",
+                            ),
                         },
                         {"role": "assistant", "content": "Hello, how are you?"},
                         {"role": "user", "content": "What is the weather like?"},
@@ -77,7 +81,10 @@ def test_bad_status(mocker):
                         # pylint: disable=C0301
                         {
                             "role": "system",
-                            "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters.",
+                            "content": generate_prompt(
+                                "naomi",
+                                "Slack",
+                            ),
                         },
                         {"role": "assistant", "content": "Hello, how are you?"},
                         {"role": "user", "content": "What is the weather like?"},
@@ -118,7 +125,10 @@ def test_exception(mocker):
                         # pylint: disable=C0301
                         {
                             "role": "system",
-                            "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters.",
+                            "content": generate_prompt(
+                                "naomi",
+                                "Slack",
+                            ),
                         },
                         {"role": "assistant", "content": "Hello, how are you?"},
                         {"role": "user", "content": "What is the weather like?"},

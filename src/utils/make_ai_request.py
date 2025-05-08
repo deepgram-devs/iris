@@ -2,6 +2,7 @@ from json import dumps
 from os import environ
 from requests import post
 from utils.logger import logger
+from utils.generate_prompt import generate_prompt
 
 platformSyntax = {
     "Slack": "<https://example.com|link description/text>",
@@ -41,7 +42,10 @@ def make_ai_request(app, messages, username, platform):
                 "role": "system",
                 # We're disabling the line length check here because the prompt cannot be shortened.
                 # pylint: disable=C0301
-                "content": f"Your name is Iris. You are a {platform} bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, {username}. Remember that you must use the appropriate formatting for {platform}, so that your message renders correctly for the user. For example, links must be formatted as {platformSyntax[platform]}. Your responses should never exceed 2000 characters.",
+                "content": generate_prompt(
+                    username,
+                    platform,
+                ),
             },
         ] + list(mapped_messages)
         # URL: https://gnosis.deepgram.com/v1/chat/completions
