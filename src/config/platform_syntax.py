@@ -5,7 +5,7 @@
 platform_syntax = {
     "Slack": {
         "links": "<https://example.com|link description/text>",
-        "bold": "*bold text*",
+        "bold": "*bold text* - DO NOT USE TWO ASTERISKS SLACK WILL NOT RENDER IT",
         "italic": "_italic text_",
         "code": "`code`",
         "code_block": "```\ncode block\n```",

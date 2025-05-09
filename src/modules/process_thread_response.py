@@ -1,7 +1,7 @@
 from utils.fetch_thread_messages import fetch_thread_messages
 from utils.make_ai_request import make_ai_request
 from utils.logger import logger
-
+import re
 
 def process_thread_response(app, message, say):
     """
@@ -26,8 +26,10 @@ def process_thread_response(app, message, say):
         username = app.client.users_info(user=message["user"])["user"]["profile"][
             "display_name"
         ]
-        result = make_ai_request(app, past_replies, username, "Slack")
-        say(text=result, thread_ts=message["thread_ts"])
+        logger(app, f"Parsed username: {username}")
+        response = make_ai_request(app, past_replies, username, "Slack")
+        response = re.sub(r'\*\*(.*?)\*\*', r'*\1*', response)
+        say(text=response, thread_ts=message["thread_ts"])
     except Exception as e:
         logger(app, f"Error processing thread response: {e}")
         say(

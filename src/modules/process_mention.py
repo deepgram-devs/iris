@@ -1,6 +1,6 @@
 from utils.make_ai_request import make_ai_request
 from utils.logger import logger
-
+import re
 
 def process_mention(app, message, say):
     """
@@ -21,7 +21,9 @@ def process_mention(app, message, say):
         username = app.client.users_info(user=message["user"])["user"]["profile"][
             "display_name"
         ]
+        logger(app, f"Parsed username: {username}")
         response = make_ai_request(app, [message], username, "Slack")
+        response = re.sub(r'\*\*(.*?)\*\*', r'*\1*', response)
         say(text=response, thread_ts=message["ts"])
     except Exception as e:
         logger(app, f"Error processing mention: {e}")
