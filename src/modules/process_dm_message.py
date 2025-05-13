@@ -25,6 +25,8 @@ def process_dm_message(app, message, say):
         logger(app, f"Parsed username: {username}")
         response = make_ai_request(app, [message], username, "Slack")
         response = re.sub(r'\*\*(.*?)\*\*', r'*\1*', response)
+        # Strip language tags from codeblocks
+        response = re.sub(r'```(.*?)\n', '```\n', response)
         say(text=response, thread_ts=message["ts"])
     except Exception as e:
         print(e)

@@ -29,6 +29,8 @@ def process_thread_response(app, message, say):
         logger(app, f"Parsed username: {username}")
         response = make_ai_request(app, past_replies, username, "Slack")
         response = re.sub(r'\*\*(.*?)\*\*', r'*\1*', response)
+        # Strip language tags from codeblocks
+        response = re.sub(r'```(.*?)\n', '```\n', response)
         say(text=response, thread_ts=message["thread_ts"])
     except Exception as e:
         logger(app, f"Error processing thread response: {e}")
