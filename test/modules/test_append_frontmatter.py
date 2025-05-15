@@ -20,7 +20,7 @@ def test_append_slack_frontmatter(mocker):
     assert (
         result == "---\n"
         "user: test_user\n"
-        "date: 2009-02-13 15:33:33.456000\n"
+        "date: 2009-02-13 23:33:33.456000+00:00\n"
         "channel: test_channel\n"
         "mentions: Yes\n"
         "---\n\n<https://example.com|link description/text> <@U08KECNAEP9>\n"

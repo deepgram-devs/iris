@@ -23,9 +23,10 @@ def append_slack_frontmatter(app, message):
     ]
     ts = message["ts"]
     seconds, milliseconds = map(int, ts.split("."))
-    date = datetime.datetime.fromtimestamp(seconds) + datetime.timedelta(
-        milliseconds=milliseconds
-    )
+    # Set timezone to UTC
+    date = datetime.datetime.fromtimestamp(
+        seconds, datetime.timezone.utc
+    ) + datetime.timedelta(milliseconds=milliseconds)
     channel_name = app.client.conversations_info(channel=message["channel"])["channel"][
         "name"
     ]
