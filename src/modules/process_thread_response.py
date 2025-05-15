@@ -32,7 +32,42 @@ def process_thread_response(app, message, say):
         response = re.sub(r"\*\*(.*?)\*\*", r"*\1*", response)
         # Strip language tags from codeblocks
         response = re.sub(r"```(.*?)\n", "```\n", response)
-        say(text=response, thread_ts=message["thread_ts"])
+        blocks = [
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": response,
+                },
+            },
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": "Please use the buttons below to provide feedback *on the accuracy of the response ONLY*. Please do NOT use this system to indicate your satisfaction with the answer itself.",
+                    }
+                ],
+            },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {"type": "plain_text", "text": "👍🏻", "emoji": True},
+                        "value": "feedback-positive",
+                        "action_id": "feedback-positive",
+                    },
+                    {
+                        "type": "button",
+                        "text": {"type": "plain_text", "text": "👎🏻", "emoji": True},
+                        "value": "feedback-negative",
+                        "action_id": "feedback-negative",
+                    },
+                ],
+            },
+        ]
+        say(blocks=blocks, text=response, thread_ts=message["thread_ts"])
     except Exception as e:
         logger(app, f"Error processing thread response: {e}")
         say(
