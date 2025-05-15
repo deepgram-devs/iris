@@ -2,13 +2,25 @@
 from os import environ
 from json import dumps
 from utils.make_ai_request import make_ai_request
+from utils.generate_prompt import generate_prompt
+from modules.append_frontmatter import append_slack_frontmatter
 
 
 def test_success(mocker):
     environ["GNOSIS_TOKEN"] = "test_key"
     messages = [
-        {"user": "U08KECNAEP9", "text": "Hello, how are you?"},
-        {"user": "naomi", "text": "What is the weather like?"},
+        {
+            "user": "U08KECNAEP9",
+            "text": "Hello, how are you?",
+            "ts": "1234567890.123456",
+            "channel": "C12345678",
+        },
+        {
+            "user": "naomi",
+            "text": "What is the weather like?",
+            "ts": "1234567890.123456",
+            "channel": "C12345678",
+        },
     ]
     mock_post = mocker.patch("utils.make_ai_request.post")
     mock_response = mocker.Mock()
@@ -18,6 +30,10 @@ def test_success(mocker):
     }
     mock_post.return_value = mock_response
     app = mocker.Mock()
+    app.client.users_info.return_value = {
+        "user": {"profile": {"display_name": "test_user"}}
+    }
+    app.client.conversations_info.return_value = {"channel": {"name": "test_channel"}}
     response = make_ai_request(app, messages, "naomi", "Slack")
     assert response == "I'm good, thank you!"
     mock_post.assert_called_once_with(
@@ -32,10 +48,19 @@ def test_success(mocker):
                         # pylint: disable=C0301
                         {
                             "role": "system",
-                            "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters.",
+                            "content": generate_prompt(
+                                "naomi",
+                                "Slack",
+                            ),
                         },
-                        {"role": "assistant", "content": "Hello, how are you?"},
-                        {"role": "user", "content": "What is the weather like?"},
+                        {
+                            "role": "assistant",
+                            "content": append_slack_frontmatter(app, messages[0]),
+                        },
+                        {
+                            "role": "user",
+                            "content": append_slack_frontmatter(app, messages[1]),
+                        },
                     ]
                 ),
             }
@@ -50,8 +75,18 @@ def test_success(mocker):
 def test_bad_status(mocker):
     environ["GNOSIS_TOKEN"] = "test_key"
     messages = [
-        {"user": "U08KECNAEP9", "text": "Hello, how are you?"},
-        {"user": "naomi", "text": "What is the weather like?"},
+        {
+            "user": "U08KECNAEP9",
+            "text": "Hello, how are you?",
+            "ts": "1234567890.123456",
+            "channel": "C12345678",
+        },
+        {
+            "user": "naomi",
+            "text": "What is the weather like?",
+            "ts": "1234567890.123456",
+            "channel": "C12345678",
+        },
     ]
     mock_post = mocker.patch("utils.make_ai_request.post")
     mock_response = mocker.Mock()
@@ -61,6 +96,10 @@ def test_bad_status(mocker):
     }
     mock_post.return_value = mock_response
     app = mocker.Mock()
+    app.client.users_info.return_value = {
+        "user": {"profile": {"display_name": "test_user"}}
+    }
+    app.client.conversations_info.return_value = {"channel": {"name": "test_channel"}}
     mock_logger = mocker.Mock()
     mocker.patch("utils.make_ai_request.logger", mock_logger)
     response = make_ai_request(app, messages, "naomi", "Slack")
@@ -77,10 +116,19 @@ def test_bad_status(mocker):
                         # pylint: disable=C0301
                         {
                             "role": "system",
-                            "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters.",
+                            "content": generate_prompt(
+                                "naomi",
+                                "Slack",
+                            ),
                         },
-                        {"role": "assistant", "content": "Hello, how are you?"},
-                        {"role": "user", "content": "What is the weather like?"},
+                        {
+                            "role": "assistant",
+                            "content": append_slack_frontmatter(app, messages[0]),
+                        },
+                        {
+                            "role": "user",
+                            "content": append_slack_frontmatter(app, messages[1]),
+                        },
                     ]
                 ),
             }
@@ -96,12 +144,26 @@ def test_bad_status(mocker):
 def test_exception(mocker):
     environ["GNOSIS_TOKEN"] = "test_key"
     messages = [
-        {"user": "U08KECNAEP9", "text": "Hello, how are you?"},
-        {"user": "naomi", "text": "What is the weather like?"},
+        {
+            "user": "U08KECNAEP9",
+            "text": "Hello, how are you?",
+            "ts": "1234567890.123456",
+            "channel": "C12345678",
+        },
+        {
+            "user": "naomi",
+            "text": "What is the weather like?",
+            "ts": "1234567890.123456",
+            "channel": "C12345678",
+        },
     ]
     mock_post = mocker.patch("utils.make_ai_request.post")
     mock_post.side_effect = Exception("Network error")
     app = mocker.Mock()
+    app.client.users_info.return_value = {
+        "user": {"profile": {"display_name": "test_user"}}
+    }
+    app.client.conversations_info.return_value = {"channel": {"name": "test_channel"}}
     mock_logger = mocker.Mock()
     mocker.patch("utils.make_ai_request.logger", mock_logger)
     response = make_ai_request(app, messages, "naomi", "Slack")
@@ -118,10 +180,19 @@ def test_exception(mocker):
                         # pylint: disable=C0301
                         {
                             "role": "system",
-                            "content": "Your name is Iris. You are a Slack bot that helps users with their questions. Your goal is to be as informative and helpful as possible. Whenever you can, include a link to sources you are referencing. Always use the user's name, naomi. Remember that you must use the appropriate formatting for Slack, so that your message renders correctly for the user. For example, links must be formatted as <https://example.com|link description/text>. Your responses should never exceed 2000 characters.",
+                            "content": generate_prompt(
+                                "naomi",
+                                "Slack",
+                            ),
                         },
-                        {"role": "assistant", "content": "Hello, how are you?"},
-                        {"role": "user", "content": "What is the weather like?"},
+                        {
+                            "role": "assistant",
+                            "content": append_slack_frontmatter(app, messages[0]),
+                        },
+                        {
+                            "role": "user",
+                            "content": append_slack_frontmatter(app, messages[1]),
+                        },
                     ]
                 ),
             }
