@@ -3,6 +3,7 @@ from os import environ
 from requests import post
 from utils.logger import logger
 from utils.generate_prompt import generate_prompt
+from modules.append_frontmatter import append_slack_frontmatter
 
 platformSyntax = {
     "Slack": "<https://example.com|link description/text>",
@@ -32,7 +33,7 @@ def make_ai_request(app, messages, username, platform):
         mapped_messages = map(
             lambda message: {
                 "role": "assistant" if message["user"] == "U08KECNAEP9" else "user",
-                "content": message["text"],
+                "content": append_slack_frontmatter(app, message),
             },
             messages,
         )
