@@ -1,6 +1,6 @@
+import re
 from utils.make_ai_request import make_ai_request
 from utils.logger import logger
-import re
 
 
 def process_dm_message(app, message, say):

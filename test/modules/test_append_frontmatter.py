@@ -1,3 +1,4 @@
+# pylint: disable=C0116
 from modules.append_frontmatter import append_slack_frontmatter
 
 def test_append_slack_frontmatter(mocker):

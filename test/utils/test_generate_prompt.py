@@ -1,3 +1,4 @@
+# pylint: disable=C0116
 from utils.generate_prompt import generate_prompt, get_platform_syntax
 
 

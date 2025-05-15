@@ -1,7 +1,7 @@
+import re
 from utils.fetch_thread_messages import fetch_thread_messages
 from utils.make_ai_request import make_ai_request
 from utils.logger import logger
-import re
 
 def process_thread_response(app, message, say):
     """
