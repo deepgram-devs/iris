@@ -1,5 +1,6 @@
 from config.platform_syntax import platform_syntax
 
+
 def get_platform_syntax(platform):
     """
     Retrieves the syntax for the specified platform.
@@ -26,6 +27,7 @@ def get_platform_syntax(platform):
         f"Header: {platform_syntax[platform].get('header', 'Unsupported on this platform.')}\n"
         f"Remember to use the appropriate formatting for {platform} so that your message renders correctly for the user."
     )
+
 
 def generate_prompt(username, platform):
     """

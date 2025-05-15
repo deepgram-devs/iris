@@ -2,6 +2,7 @@ import re
 from utils.make_ai_request import make_ai_request
 from utils.logger import logger
 
+
 def process_mention(app, message, say):
     """
     Processes a message which mentions the bot. Prompts Gnosis with the
@@ -23,9 +24,9 @@ def process_mention(app, message, say):
         ]
         logger(app, f"Parsed username: {username}")
         response = make_ai_request(app, [message], username, "Slack")
-        response = re.sub(r'\*\*(.*?)\*\*', r'*\1*', response)
+        response = re.sub(r"\*\*(.*?)\*\*", r"*\1*", response)
         # Strip language tags from codeblocks
-        response = re.sub(r'```(.*?)\n', '```\n', response)
+        response = re.sub(r"```(.*?)\n", "```\n", response)
         say(text=response, thread_ts=message["ts"])
     except Exception as e:
         logger(app, f"Error processing mention: {e}")

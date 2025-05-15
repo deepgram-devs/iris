@@ -49,8 +49,7 @@ def test_get_slack_syntax():
 def test_generate_discord():
     username = "naomi"
     platform = "Discord"
-    expected_prompt = (
-        f"""You are **Iris**, a helpful assistant bot operating on the {platform} platform. You are an AI companion acting as part of the Deepgram team.
+    expected_prompt = f"""You are **Iris**, a helpful assistant bot operating on the {platform} platform. You are an AI companion acting as part of the Deepgram team.
 
 You assist users like {username} by guiding them to solve problems through self-discovery, not just direct answers.
 
@@ -80,15 +79,13 @@ Each message will contain front-matter with the following fields:
 - channel: The channel where the message was sent.
 - mentions: Whether the user mentioned you specifically, thereby requesting a response from you.
 """
-    )
     assert generate_prompt(username, platform) == expected_prompt
 
 
 def test_generate_slack():
     username = "naomi"
     platform = "Slack"
-    expected_prompt = (
-        f"""You are **Iris**, a helpful assistant bot operating on the {platform} platform. You are an AI companion acting as part of the Deepgram team.
+    expected_prompt = f"""You are **Iris**, a helpful assistant bot operating on the {platform} platform. You are an AI companion acting as part of the Deepgram team.
 
 You assist users like {username} by guiding them to solve problems through self-discovery, not just direct answers.
 
@@ -118,5 +115,4 @@ Each message will contain front-matter with the following fields:
 - channel: The channel where the message was sent.
 - mentions: Whether the user mentioned you specifically, thereby requesting a response from you.
 """
-    )
     assert generate_prompt(username, platform) == expected_prompt

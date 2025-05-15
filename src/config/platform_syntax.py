@@ -1,7 +1,8 @@
 """
-  This module contains an object that maps different platforms to their respective link syntax.
-  Use this to help the AI understand the markdown discrepancies between platforms.
+This module contains an object that maps different platforms to their respective link syntax.
+Use this to help the AI understand the markdown discrepancies between platforms.
 """
+
 platform_syntax = {
     "Slack": {
         "links": "<https://example.com|link description/text>",
@@ -27,5 +28,5 @@ platform_syntax = {
         "underline": "__underline__",
         "spoiler": "||spoiler||",
         "header": "# Top Level Header\n## Second Level Header\n### Third Level Header",
-    }
+    },
 }

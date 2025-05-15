@@ -5,7 +5,9 @@ from modules.process_mention import process_mention
 def test_success(mocker):
     mock_frontmatter = mocker.Mock()
     mock_frontmatter.return_value = "---\nuser: naomi\ndate: 2009-02-13 15:33:33.456000\nchannel: test_channel\nmentions: Yes\n---\n\nnaomi\n"
-    mocker.patch("modules.append_frontmatter.append_slack_frontmatter", mock_frontmatter)
+    mocker.patch(
+        "modules.append_frontmatter.append_slack_frontmatter", mock_frontmatter
+    )
     mock_request = mocker.Mock()
     mock_request.return_value = "mocked response"
     mocker.patch("modules.process_mention.make_ai_request", mock_request)
@@ -25,7 +27,9 @@ def test_success(mocker):
 def test_error(mocker):
     mock_frontmatter = mocker.Mock()
     mock_frontmatter.return_value = "---\nuser: naomi\ndate: 2009-02-13 15:33:33.456000\nchannel: test_channel\nmentions: Yes\n---\n\nnaomi\n"
-    mocker.patch("modules.append_frontmatter.append_slack_frontmatter", mock_frontmatter)
+    mocker.patch(
+        "modules.append_frontmatter.append_slack_frontmatter", mock_frontmatter
+    )
     mock_request = mocker.Mock()
     mock_request.side_effect = Exception("Error")
     mocker.patch("modules.process_mention.make_ai_request", mock_request)

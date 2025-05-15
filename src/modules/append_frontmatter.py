@@ -1,5 +1,6 @@
 import datetime
 
+
 def append_slack_frontmatter(app, message):
     """
     Appends frontmatter to a Slack message. Includes the following:
@@ -21,11 +22,13 @@ def append_slack_frontmatter(app, message):
         "display_name"
     ]
     ts = message["ts"]
-    seconds, milliseconds = map(int, ts.split('.'))
-    date = datetime.datetime.fromtimestamp(seconds) + datetime.timedelta(milliseconds=milliseconds)
-    channel_name = app.client.conversations_info(
-        channel=message["channel"]
-    )["channel"]["name"]
+    seconds, milliseconds = map(int, ts.split("."))
+    date = datetime.datetime.fromtimestamp(seconds) + datetime.timedelta(
+        milliseconds=milliseconds
+    )
+    channel_name = app.client.conversations_info(channel=message["channel"])["channel"][
+        "name"
+    ]
     mentions = "Yes" if "<@U08KECNAEP9>" in text else "No"
     return f"""---
 user: {username}

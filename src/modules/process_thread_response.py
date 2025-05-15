@@ -3,6 +3,7 @@ from utils.fetch_thread_messages import fetch_thread_messages
 from utils.make_ai_request import make_ai_request
 from utils.logger import logger
 
+
 def process_thread_response(app, message, say):
     """
     Processes a threaded message. In a DM context, this is any response sent by the user
@@ -28,9 +29,9 @@ def process_thread_response(app, message, say):
         ]
         logger(app, f"Parsed username: {username}")
         response = make_ai_request(app, past_replies, username, "Slack")
-        response = re.sub(r'\*\*(.*?)\*\*', r'*\1*', response)
+        response = re.sub(r"\*\*(.*?)\*\*", r"*\1*", response)
         # Strip language tags from codeblocks
-        response = re.sub(r'```(.*?)\n', '```\n', response)
+        response = re.sub(r"```(.*?)\n", "```\n", response)
         say(text=response, thread_ts=message["thread_ts"])
     except Exception as e:
         logger(app, f"Error processing thread response: {e}")
