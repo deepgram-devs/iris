@@ -15,6 +15,7 @@ def test_append_slack_frontmatter(mocker):
         "user": "U08KECNAEP9",
         "ts": "1234567890.123456",
         "channel": "C12345678",
+        "channel_type": "channel",
     }
     result = append_slack_frontmatter(mock_app, message)
     assert (

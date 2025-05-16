@@ -27,9 +27,11 @@ def append_slack_frontmatter(app, message):
     date = datetime.datetime.fromtimestamp(
         seconds, datetime.timezone.utc
     ) + datetime.timedelta(milliseconds=milliseconds)
-    channel_name = app.client.conversations_info(channel=message["channel"])["channel"][
-        "name"
-    ]
+    channel_name = (
+        app.client.conversations_info(channel=message["channel"])["channel"]["name"]
+        if "channel_type" in message and message["channel_type"] == "channel"
+        else "Unknown"
+    )
     mentions = "Yes" if "<@U08KECNAEP9>" in text else "No"
     return f"""---
 user: {username}
