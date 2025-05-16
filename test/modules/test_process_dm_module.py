@@ -14,6 +14,43 @@ def test_success(mocker):
     mock_user_request.return_value = {"user": {"profile": {"display_name": "naomi"}}}
     mock_client = mocker.Mock(client=mocker.Mock(users_info=mock_user_request))
     mocker.patch("modules.process_dm_message.make_ai_request", mock_request)
+    blocks = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "mocked response",
+            },
+        },
+        {
+            "type": "context",
+            "elements": [
+                {
+                    "type": "mrkdwn",
+                    "text": "Please use the buttons below to provide feedback *on the accuracy of the response ONLY*. Please do NOT use this system to indicate your satisfaction with the answer itself.",
+                }
+            ],
+        },
+        {
+            "type": "actions",
+            "elements": [
+                {
+                    "type": "button",
+                    "text": {"type": "plain_text", "text": "👍🏻", "emoji": True},
+                    "value": "feedback-positive",
+                    "action_id": "feedback-positive",
+                    "style": "primary",
+                },
+                {
+                    "type": "button",
+                    "text": {"type": "plain_text", "text": "👎🏻", "emoji": True},
+                    "value": "feedback-negative",
+                    "action_id": "feedback-negative",
+                    "style": "danger",
+                },
+            ],
+        },
+    ]
     mocked_say = mocker.Mock()
     process_dm_message(
         mock_client, {"ts": 1, "user": "naomi", "text": "naomi"}, mocked_say
@@ -21,7 +58,9 @@ def test_success(mocker):
     mock_request.assert_called_once_with(
         mock_client, [{"ts": 1, "user": "naomi", "text": "naomi"}], "naomi", "Slack"
     )
-    mocked_say.assert_called_once_with(text="mocked response", thread_ts=1)
+    mocked_say.assert_called_once_with(
+        text="mocked response", blocks=blocks, thread_ts=1
+    )
 
 
 def test_error(mocker):

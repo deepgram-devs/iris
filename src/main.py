@@ -6,11 +6,44 @@ Mounts the "message" event listener, authenticates the bot, and starts the app.
 from os import environ
 from slack_bolt import App
 from events.handle_message import handle_message
+from modules.process_feedback import process_feedback
 
 app = App(
     token=environ.get("SLACK_BOT_TOKEN"),
     signing_secret=environ.get("SLACK_SIGNING_SECRET"),
 )
+
+
+@app.action("forward-feedback")
+def handle_forward_feedback(ack, _body, say):
+    """
+    Handles the action of forwarding feedback. NOT YET IMPLEMENTED.
+    Will roll this out when Gnosis supports it.
+    """
+    ack()
+    say(
+        text="I'm sorry, but this feature is not yet implemented. Please check back later."
+    )
+
+
+@app.action("feedback-positive")
+def handle_feedback_positive(ack, body, say):
+    """
+    Handles positive feedback from the user. Acknowledges the action and
+    sends a message to the user.
+    """
+    ack()
+    process_feedback(app, body, say, "Positive")
+
+
+@app.action("feedback-negative")
+def handle_feedback_negative(ack, body, say):
+    """
+    Handles negative feedback from the user. Acknowledges the action and
+    sends a message to the user.
+    """
+    ack()
+    process_feedback(app, body, say, "Negative")
 
 
 @app.event("message")
@@ -19,6 +52,8 @@ def callback(message, say):
     Wrapper for the event listener. Passes the message and
     say function to the handle_message function.
     """
+    if message["user"] == environ.get("BOT_USER_ID"):
+        return
     handle_message(app, message, say)
 
 
