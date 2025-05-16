@@ -13,6 +13,7 @@ app = App(
     signing_secret=environ.get("SLACK_SIGNING_SECRET"),
 )
 
+
 @app.action("forward-feedback")
 def handle_forward_feedback(ack, _body, say):
     """
@@ -20,7 +21,9 @@ def handle_forward_feedback(ack, _body, say):
     Will roll this out when Gnosis supports it.
     """
     ack()
-    say(text="I'm sorry, but this feature is not yet implemented. Please check back later.")
+    say(
+        text="I'm sorry, but this feature is not yet implemented. Please check back later."
+    )
 
 
 @app.action("feedback-positive")

@@ -151,7 +151,7 @@ def test_process_feedback(mocker):
                     "text": "Positive Feedback from U08KECNAEP9",
                 },
             },
-            { 
+            {
                 "type": "context",
                 "elements": [
                     {

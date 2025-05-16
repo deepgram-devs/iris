@@ -84,7 +84,7 @@ def process_feedback(app, body, say, feedback_type):
                         "action_id": "forward-feedback",
                     }
                 ],
-            }
+            },
         ]
         app.client.chat_postMessage(
             channel=feedback_channel,
