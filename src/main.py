@@ -52,6 +52,8 @@ def callback(message, say):
     Wrapper for the event listener. Passes the message and
     say function to the handle_message function.
     """
+    if message["user"] == environ.get("BOT_USER_ID"):
+        return
     handle_message(app, message, say)
 
 
