@@ -13,6 +13,7 @@ app = App(
     signing_secret=environ.get("SLACK_SIGNING_SECRET"),
 )
 
+
 @app.action("feedback-positive")
 def handle_feedback_positive(ack, body, say):
     """
@@ -22,6 +23,7 @@ def handle_feedback_positive(ack, body, say):
     ack()
     process_feedback(app, body, say, "Positive")
 
+
 @app.action("feedback-negative")
 def handle_feedback_negative(ack, body, say):
     """
@@ -30,6 +32,7 @@ def handle_feedback_negative(ack, body, say):
     """
     ack()
     process_feedback(app, body, say, "Negative")
+
 
 @app.event("message")
 def callback(message, say):

@@ -1,6 +1,7 @@
 import os
 from utils.logger import logger
 
+
 def process_feedback(app, body, say, feedback_type):
     """
     Processes feedback from the user. Sends a confirmation message back to the user in a thread from that message.
@@ -19,9 +20,11 @@ def process_feedback(app, body, say, feedback_type):
     try:
         logger(app, f"Feedback Payload: {body}")
         message = body["message"]
-        user = app.client.users_info(user=body["user"]["id"])["user"]["profile"]["display_name"]
+        user = app.client.users_info(user=body["user"]["id"])["user"]["profile"][
+            "display_name"
+        ]
         feedback_channel = os.environ.get("FEEDBACK_CHANNEL")
-        if feedback_channel is None:
+        if feedback_channel is None or feedback_channel == "":
             logger(app, "Feedback channel not set in environment variables.")
             say(
                 text="Feedback channel is not configured. Please contact the admin.",
@@ -43,7 +46,7 @@ def process_feedback(app, body, say, feedback_type):
                 "text": {
                     "type": "plain_text",
                     "text": f"{feedback_type} Feedback from {message['user']}",
-                }
+                },
             },
             {
                 "type": "context",
@@ -77,9 +80,13 @@ def process_feedback(app, body, say, feedback_type):
         logger(app, f"Parsed feedback type: {feedback_type}\n{blocks}")
         # Sending a confirmation message back to the user
         say(
-            text=f"Thank for your feedback <@{user}>! You selected: {feedback_type}",
+            text=f"Thank you for your feedback <@{user}>! You selected: {feedback_type}",
             thread_ts=message["thread_ts"],
         )
     except Exception as e:
         print(e)
         logger(app, f"Error processing feedback: {e}")
+        say(
+            text="There was an error processing your feedback. Please try again later.",
+            thread_ts=message["thread_ts"],
+        )
