@@ -11,8 +11,8 @@ def test_process_feedback(mocker):
     mock_thread_request.return_value = {
         "messages": [
             {
-                "user": "U08KECNAEP9",
-                "text": "Hi Naomi! How can I assist you today? :blush:",
+                "user": "U079TFYDT8X",
+                "text": "Hey Iris! How are you?",
                 "ts": "1747352242.168559",
                 "bot_id": "B08KECN9AFR",
                 "app_id": "A08KXEYD6P5",
@@ -24,7 +24,7 @@ def test_process_feedback(mocker):
     }
     mocked_say = mocker.Mock()
     mock_user_request = mocker.Mock()
-    mock_user_request.return_value = {"user": {"profile": {"display_name": "naomi"}}}
+    mock_user_request.return_value = {"user": {"profile": {"display_name": "Naomi"}}}
     mock_send = mocker.Mock()
     mock_client = mocker.Mock(
         client=mocker.Mock(
@@ -137,8 +137,58 @@ def test_process_feedback(mocker):
         "Positive",
     )
     mocked_say.assert_called_once_with(
-        text="Thank you for your feedback <@naomi>! You selected: Positive",
+        text="Thank you for your feedback Naomi! You selected: Positive",
         thread_ts="1747352238.476939",
+    )
+    mock_send.assert_called_once_with(
+        channel="C12345",
+        text="Feedback received!",
+        blocks=[
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "Positive Feedback from U08KECNAEP9",
+                },
+            },
+            { 
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": "Feedback from Naomi:",
+                    }
+                ],
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Question: Hey Iris! How are you?",
+                },
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "Response: Hi Naomi! How can I assist you today? :blush:",
+                },
+            },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Forward to Gnosis!",
+                        },
+                        "value": "forward-feedback",
+                        "action_id": "forward-feedback",
+                    }
+                ],
+            },
+        ],
     )
 
 

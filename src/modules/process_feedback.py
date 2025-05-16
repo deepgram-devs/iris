@@ -53,7 +53,7 @@ def process_feedback(app, body, say, feedback_type):
                 "elements": [
                     {
                         "type": "mrkdwn",
-                        "text": f"Feedback from <@{user}>:",
+                        "text": f"Feedback from {user}:",
                     }
                 ],
             },
@@ -71,6 +71,20 @@ def process_feedback(app, body, say, feedback_type):
                     "text": f"Response: {message['text']}",
                 },
             },
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "Forward to Gnosis!",
+                        },
+                        "value": "forward-feedback",
+                        "action_id": "forward-feedback",
+                    }
+                ],
+            }
         ]
         app.client.chat_postMessage(
             channel=feedback_channel,
@@ -80,7 +94,7 @@ def process_feedback(app, body, say, feedback_type):
         logger(app, f"Parsed feedback type: {feedback_type}\n{blocks}")
         # Sending a confirmation message back to the user
         say(
-            text=f"Thank you for your feedback <@{user}>! You selected: {feedback_type}",
+            text=f"Thank you for your feedback {user}! You selected: {feedback_type}",
             thread_ts=message["thread_ts"],
         )
     except Exception as e:
