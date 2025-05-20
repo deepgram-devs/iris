@@ -1,13 +1,14 @@
-ARG PYTHON_VERSION=3.13.2
-FROM python:${PYTHON_VERSION}-slim
+ARG NODE_VERSION=22.11.0
+
+FROM node:${NODE_VERSION}-alpine AS base
 
 WORKDIR /app
 
-COPY Pipfile Pipfile.lock ./
-RUN pip install --no-cache-dir pipenv
-RUN pipenv install --deploy --ignore-pipfile
-
-# Copy all project files (including src/main.py)
+# Copy the entire thing
 COPY . .
 
-CMD ["pipenv", "run", "python3", "src/main.py"]
+# Install dependencies and build the bot
+RUN pnpm install && pnpm build
+
+# Run the bot application
+CMD ["pnpm", "start"]
