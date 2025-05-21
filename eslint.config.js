@@ -10,6 +10,13 @@ export default [
           allowedLicenses: ["MIT"],
         },
       ],
+      "@typescript-eslint/max-params": [
+        "warn",
+        {
+          max: 4,
+          ignoreRestArgs: true,
+        },
+      ]
     },
   },
 ];
