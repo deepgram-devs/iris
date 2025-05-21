@@ -4,6 +4,7 @@
  * @author Naomi Carrigan
  */
 
+import { platformSyntax } from "../config/platformSyntax.js";
 import type { KnownEventFromType } from "@slack/bolt";
 
 /**
@@ -22,4 +23,17 @@ const isSlackMessageInThread = (
   );
 };
 
-export { isSlackMessageInThread };
+/**
+ * Checks if a property is in the platform syntax object for a given platform.
+ * @param platform - The platform to check.
+ * @param property - The property to check.
+ * @returns True if the property is in the platform syntax object, false otherwise.
+ */
+const isPropertyInPlatformSyntaxObject = (
+  platform: keyof typeof platformSyntax,
+  property: string,
+): property is keyof typeof platformSyntax[typeof platform] => {
+  return property in platformSyntax[platform];
+};
+
+export { isSlackMessageInThread, isPropertyInPlatformSyntaxObject };

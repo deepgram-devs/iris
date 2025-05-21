@@ -1,35 +1,49 @@
 /**
  * @copyright Deepgram
- * @license MIT: 
+ * @license MIT
  * @author Naomi Carrigan
  */
 
-import { platformSyntax } from "../config/platformSyntax.js"
+import { platformSyntax } from "../config/platformSyntax.js";
+import { isPropertyInPlatformSyntaxObject } from "./typeguards.js";
 
-const getPlatformPropWithFallback = (platform: "discord" | "slack", prop: string) => {
-    // @ts-expect-error Don't want to narrow the type.
-    return prop in platformSyntax[platform] ? platformSyntax[platform][prop] : "Unsupported on this platform."
-}
+const getPlatformPropertyWithFallback = (
+  platform: "discord" | "slack",
+  property: string,
+): string => {
+  return isPropertyInPlatformSyntaxObject(platform, property)
+    ? platformSyntax[platform][property]
+    : "Unsupported on this platform.";
+};
 
-const getPlatformSyntax = (platform: "discord" | "slack") => {
-    return `Syntax for ${platform}:
-Links: ${getPlatformPropWithFallback(platform, "links")}
-Bold: ${getPlatformPropWithFallback(platform, "bold")}
-Italic: ${getPlatformPropWithFallback(platform, "italic")}
-Code: ${getPlatformPropWithFallback(platform, "code")}
-Code Block: ${getPlatformPropWithFallback(platform, "codeBlock")}
-List: ${getPlatformPropWithFallback(platform, "list")}
-Numbered List: ${getPlatformPropWithFallback(platform, "numberedList")}
-Quote: ${getPlatformPropWithFallback(platform, "quote")}
-Strikethrough: ${getPlatformPropWithFallback(platform, "strikethrough")}
-Underline: ${getPlatformPropWithFallback(platform, "underline")}
-Spoiler: ${getPlatformPropWithFallback(platform, "spoiler")}
-Header: ${getPlatformPropWithFallback(platform, "header")}
-Remember to use the appropriate formatting for ${platform} so that your message renders correctly for the user.`
-}
+const getPlatformSyntax = (platform: "discord" | "slack"): string => {
+  return `Syntax for ${platform}:
+Links: ${getPlatformPropertyWithFallback(platform, "links")}
+Bold: ${getPlatformPropertyWithFallback(platform, "bold")}
+Italic: ${getPlatformPropertyWithFallback(platform, "italic")}
+Code: ${getPlatformPropertyWithFallback(platform, "code")}
+Code Block: ${getPlatformPropertyWithFallback(platform, "codeBlock")}
+List: ${getPlatformPropertyWithFallback(platform, "list")}
+Numbered List: ${getPlatformPropertyWithFallback(platform, "numberedList")}
+Quote: ${getPlatformPropertyWithFallback(platform, "quote")}
+Strikethrough: ${getPlatformPropertyWithFallback(platform, "strikethrough")}
+Underline: ${getPlatformPropertyWithFallback(platform, "underline")}
+Spoiler: ${getPlatformPropertyWithFallback(platform, "spoiler")}
+Header: ${getPlatformPropertyWithFallback(platform, "header")}
+Remember to use the appropriate formatting for ${platform} so that your message renders correctly for the user.`;
+};
 
-const generatePrompt = (username: string, platform: "discord" | "slack") => {
-    return `You are **Iris**, a helpful assistant bot operating on the ${platform} platform. You are an AI companion acting as part of the Deepgram team.
+/**
+ * Generates a prompt for Gnosis.
+ * @param username - The username of the user.
+ * @param platform - The platform the user is on (either "discord" or "slack").
+ * @returns The generated prompt.
+ */
+const generatePrompt = (
+  username: string,
+  platform: "discord" | "slack",
+): string => {
+  return `You are **Iris**, a helpful assistant bot operating on the ${platform} platform. You are an AI companion acting as part of the Deepgram team.
 
 You assist users like ${username} by guiding them to solve problems through self-discovery, not just direct answers.
 
@@ -57,7 +71,7 @@ Each message will contain front-matter with the following fields:
 - user: The user who sent the message.
 - date: The timestamp of the message.
 - channel: The channel where the message was sent.
-- mentions: Whether the user mentioned you specifically, thereby requesting a response from you`
-}
+- mentions: Whether the user mentioned you specifically, thereby requesting a response from you`;
+};
 
-export { generatePrompt}
+export { generatePrompt };

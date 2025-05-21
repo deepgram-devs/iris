@@ -6,12 +6,17 @@
 
 import type { Iris } from "../interfaces/iris.js";
 
-export const logger = async (iris: Iris, message: string): Promise<void> => {
+/**
+ * Sends an arbitrary message to the Slack log channel.
+ * @param iris - Iris's instance.
+ * @param message - The message to send.
+ */
+export const logger = async(iris: Iris, message: string): Promise<void> => {
   const channel = process.env.SLACK_LOG_CHANNEL;
-  if (channel) {
+  if (channel !== undefined) {
     await iris.slack.client.chat.postMessage({
-      channel,
-      text: message,
+      channel: channel,
+      text:    message,
     });
   }
 };

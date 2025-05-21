@@ -1,24 +1,67 @@
-import type { FileShareMessageEvent, GenericMessageEvent } from "@slack/web-api";
-import type { Iris } from "../../interfaces/iris.js";
+/**
+ * @copyright Deepgram
+ * @license MIT
+ * @author Naomi Carrigan
+ */
+
+import { errorHandler } from "../../utils/errorHandler.js";
 import { makeAiRequestOnSlack } from "../../utils/makeAiRequest.js";
 import { trimSlackMessageFromEvent } from "../../utils/trimSlackMessage.js";
-import type { SayFn } from "@slack/bolt";
 import { generateFeedbackBlocks } from "../blocks/generateFeedbackBlocks.js";
+import type { Iris } from "../../interfaces/iris.js";
+import type { SayFn } from "@slack/bolt";
+import type {
+  FileShareMessageEvent,
+  GenericMessageEvent,
+} from "@slack/web-api";
 
-export const processSlackMentionMessage = async(iris: Iris, message: GenericMessageEvent | FileShareMessageEvent, say: SayFn) => {
-    const user = await iris.slack.client.users.info({
-        user: message.user,
+/**
+ * Responds to a Slack message mentioning Iris.
+ * Does not respond to threads, that's a different function.
+ * @param iris - Iris's instance.
+ * @param message - The message payload from Slack.
+ * @param say - The function to send a message back to the user.
+ */
+export const processSlackMentionMessage = async(
+  iris: Iris,
+  message: GenericMessageEvent | FileShareMessageEvent,
+  say: SayFn,
+): Promise<void> => {
+  try {
+    const { user } = await iris.slack.client.users.info({
+      user: message.user,
     });
-    const username = user.user?.profile?.display_name ?? user.user?.real_name ?? "Unknown User";
+    const username
+      = user?.profile?.display_name ?? user?.real_name ?? "Unknown User";
     const channelInfo = await iris.slack.client.conversations.info({
-        channel: message.channel,
+      channel: message.channel,
     });
     const channelName = channelInfo.channel?.name ?? "Unknown Public Channel";
-    const response = await makeAiRequestOnSlack(iris, [trimSlackMessageFromEvent(message)], channelName, username);
+    const response = await makeAiRequestOnSlack(
+      iris,
+      [ trimSlackMessageFromEvent(message) ],
+      channelName,
+      username,
+    );
     await say({
-        text: response,
-        blocks: generateFeedbackBlocks(response),
-        thread_ts: message.ts,
-        channel: message.channel,
+      blocks:    generateFeedbackBlocks(response),
+      channel:   message.channel,
+      text:      response,
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+      thread_ts: message.ts,
     });
-}
+  } catch (error) {
+    await errorHandler(
+      iris,
+      {
+        error:          error,
+        message:        "Error in processSlackMentionMessage",
+        slackChannelId: message.channel,
+        slackThreadTs:  message.ts,
+      },
+      {
+        say,
+      },
+    );
+  }
+};

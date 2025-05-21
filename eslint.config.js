@@ -11,12 +11,13 @@ export default [
         },
       ],
       "@typescript-eslint/max-params": [
-        "warn",
+        "error",
         {
           max: 4,
-          ignoreRestArgs: true,
         },
-      ]
+      ],
+      "max-lines-per-function": "off",
+      "complexity": "off"
     },
   },
 ];

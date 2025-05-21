@@ -1,55 +1,90 @@
-import type { MessageElement } from "@slack/web-api/dist/types/response/ConversationsHistoryResponse.js";
-import type { Iris } from "../interfaces/iris.js";
+/**
+ * @copyright Deepgram
+ * @license MIT
+ * @author Naomi Carrigan
+ */
+/* eslint-disable @typescript-eslint/naming-convention -- There's enough properties in here that cannot be camelCase we may as well turn the rule off entirely.*/
+
+import { errorHandler } from "./errorHandler.js";
 import { formatSlackMessages } from "./formatMessages.js";
 import { generatePrompt } from "./generatePrompt.js";
+import type { Iris } from "../interfaces/iris.js";
 import type { MinimalSlackMessage } from "../interfaces/minimalSlackMessage.js";
 
-const makeAiRequest = async (messages: { role: string; content: string }[]) => {
-  const request = await fetch(
-    "https://gnosis.deepgram.com/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.GNOSIS_TOKEN}`,
-        "Content-Type": "application/json",
+const makeAiRequest = async(
+  iris: Iris,
+  messages: Array<{ role: string; content: string }>,
+): Promise<string> => {
+  try {
+    const request = await fetch(
+      "https://gnosis.deepgram.com/v1/chat/completions",
+      {
+        body: JSON.stringify({
+          messages:        messages,
+          model:           "gpt-4o",
+          response_format: { type: "text" },
+          temperature:     1,
+        }),
+        headers: {
+          "Authorization": `Bearer ${process.env.GNOSIS_TOKEN ?? ""}`,
+          "Content-Type":  "application/json",
+        },
+        method: "POST",
       },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        temperature: 1,
-        response_format: { type: "text" },
-        messages,
-      }),
+    );
+    if (!request.ok) {
+      const errorResponse = await request.text();
+      throw new Error(errorResponse);
     }
-  );
-  if (!request.ok) {
-    const errorResponse = await request.text();
-    console.error("Error from Gnosis:", errorResponse);
-    return "There was an error generating a response. Please notify Naomi.";
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- JSON doesn't accept a generic.
+    const response = (await request.json()) as {
+      choices: Array<{ message: { content: string } }>;
+    };
+    return (
+      response.choices[0]?.message.content
+      ?? "There was an issue generating the response. Please try again later."
+    );
+  } catch (error) {
+    await errorHandler(
+      iris,
+      { error: error, message: "Error in makeAIRequest" },
+      {},
+    );
+    // eslint-disable-next-line stylistic/max-len -- long string.
+    return "There was an error when generating a response. Please notify Naomi.";
   }
-  const response = await request.json();
-  return response.choices[0].message.content;
 };
 
-export const makeAiRequestOnSlack = async (
+/**
+ * Formats an array of Slack messages, prepends a system message with our
+ * generated prompt, and requests a chat completion from Gnosis.
+ * @param iris - Iris' instance.
+ * @param messages - The slack messages to include as the conversation.
+ * @param channelName - The name of the channel the conversation occurred in.
+ * @param username - The user whose message triggered an AI request.
+ * @returns The response from Gnosis.
+ */
+export const makeAiRequestOnSlack = async(
   iris: Iris,
-  messages: MinimalSlackMessage[],
+  messages: Array<MinimalSlackMessage>,
   channelName: string,
-  username: string
+  username: string,
 ): Promise<string> => {
-  const irisUserId = (await iris.slack.client.auth.test()).user_id;
-  const formattedMessages = await formatSlackMessages(
+  const irisUser = await iris.slack.client.auth.test();
+  const irisUserId = irisUser.user_id;
+  const formattedMessages = formatSlackMessages(
     messages,
     channelName,
     username,
-    irisUserId ?? "Unknown User"
+    irisUserId ?? "Unknown User",
   );
   const allMessages = [
     {
-      role: "system",
       content: generatePrompt(username, "slack"),
+      role:    "system",
     },
     ...formattedMessages,
   ];
-  const result = await makeAiRequest(allMessages);
+  const result = await makeAiRequest(iris, allMessages);
   return result;
 };

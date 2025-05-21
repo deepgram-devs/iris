@@ -4,14 +4,16 @@
  * @author Naomi Carrigan
  */
 import { App } from "@slack/bolt";
-import type { Iris } from "./interfaces/iris.js";
 import { mountSlackEvents } from "./events/mountSlackEvents.js";
+import { logger } from "./utils/logger.js";
+import type { Iris } from "./interfaces/iris.js";
 
 if (
   process.env.SLACK_SIGNING_SECRET === undefined
   || process.env.SLACK_BOT_TOKEN === undefined
 ) {
   throw new Error(
+    // eslint-disable-next-line stylistic/max-len -- Long string.
     "SLACK_SIGNING_SECRET and SLACK_BOT_TOKEN must be set in the environment variables.",
   );
 }
@@ -28,9 +30,9 @@ mountSlackEvents(iris);
 await iris.slack.
   start(process.env.PORT ?? 3000).
   then(() => {
-    console.log(`⚡️ Slack app is running on port ${process.env.PORT ?? 3000}`);
+    void logger(iris, `⚡️ Slack app is running on port ${process.env.PORT ?? "3000"}`);
   }).
-  catch((error) => {
-    console.error("Error starting Slack app:", error);
+  catch((error: unknown) => {
+    void logger(iris, `Error starting Slack app: ${String(error)}`);
     process.exit(1);
   });

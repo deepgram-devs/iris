@@ -4,78 +4,112 @@
  * @author Naomi Carrigan
  */
 
-import type { Iris } from "../interfaces/iris.js"
-import type {  RespondFn, BlockAction, BlockElementAction} from "@slack/bolt";
+import type { Iris } from "../interfaces/iris.js";
+import type { RespondFn, BlockAction } from "@slack/bolt";
 
-export const processFeedback = async (iris: Iris, body: BlockAction<BlockElementAction>, respond: RespondFn, feedbackType: "positive" | "negative") => {
-    const { message } = body;
-    if (!message) {
-        await respond({
-            text: "No message found in the feedback payload.",
-            response_type: "ephemeral",
-        });
-        return;
-    }
-    const user = message.user ? (await iris.slack.client.users.info({
-        user: message.user,
-    })).user?.profile?.display_name ?? "Unknown User" : "Unknown User";
-    const channelId = process.env.FEEDBACK_CHANNEL;
-    if (!channelId) {
-        await respond({
-            text: "Feedback channel not set in environment variables.",
-            response_type: "ephemeral",
-            thread_ts: message.thread_ts,
-        })
-        return;
-    }
-    const previousMessageReq = await iris.slack.client.conversations.replies({
-        channel: message.channel,
-        ts: message.thread_ts,
-        latest: message.ts,
-        limit: 1,
-        inclusive: false,
-    });
-    const previousMessage = previousMessageReq.messages?.[0];
-    const blocks = [
-        {
-            type: "header",
-            text: {
-                type: "plain_text",
-                text: `${feedbackType.charAt(0).toUpperCase() + feedbackType.slice(1)} Feedback`,
-            },
-        },
-        {
-            type: "context",
-            elements: [
-                {
-                    type: "mrkdwn",
-                    text: `Feedback from ${user}:`,
-                },
-            ],
-        },
-        {
-            type: "section",
-            text: {
-                type: "mrkdwn",
-                text: `Question: ${previousMessage?.text}`,
-            },
-        },
-        {
-            type: "section",
-            text: {
-                type: "mrkdwn",
-                text: `Response: ${message.text}`,
-            },
-        },
-    ]
-    await iris.slack.client.chat.postMessage({
-        channel: channelId,
-        text: "Feedback received!",
-        blocks,
-    });
+/**
+ * Grabs the question and answer that are associated with user
+ * feedback and sends them to the feedback channel.
+ * @param iris - Iris's instance.
+ * @param body - The action payload from Slack.
+ * @param respond - The function to send a message back to the user.
+ * @param feedbackType - Whether the feedback is "positive" or "negative".
+ */
+export const processFeedback = async(
+  iris: Iris,
+  body: BlockAction,
+  respond: RespondFn,
+  feedbackType: "positive" | "negative",
+): Promise<void> => {
+  const { message } = body;
+  if (!message) {
     await respond({
-        text: `Thank you for your feedback, ${user}! You selected: ${feedbackType}`,
-        response_type: "ephemeral",
-        thread_ts: message.thread_ts,
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+      response_type: "ephemeral",
+      text:          "No message found in the feedback payload.",
     });
-}
+    return;
+  }
+  const user
+    = typeof message.user === "string"
+      ? (
+        await iris.slack.client.users.info({
+          user: message.user,
+        })
+      // eslint-disable-next-line unicorn/no-await-expression-member -- Easier logic I think?
+      ).user?.profile?.display_name ?? "Unknown User"
+      : "Unknown User";
+  const channelId = process.env.FEEDBACK_CHANNEL;
+  if (channelId === undefined) {
+    await respond({
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+      response_type: "ephemeral",
+      text:          "Feedback channel not set in environment variables.",
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+      thread_ts:     typeof message.thread_ts === "string"
+        ? message.thread_ts
+        : message.ts,
+    });
+    return;
+  }
+  const previousMessageRequest = await iris.slack.client.conversations.replies({
+    channel: typeof message.channel === "string"
+      ? message.channel
+      : "Unknown",
+    inclusive: false,
+    latest:    message.ts,
+    limit:     1,
+    ts:        typeof message.thread_ts === "string"
+      ? message.thread_ts
+      : message.ts,
+  });
+  const previousMessage = previousMessageRequest.messages?.[0];
+  const blocks = [
+    {
+      text: {
+        text: `${
+          feedbackType.charAt(0).toUpperCase() + feedbackType.slice(1)
+        } Feedback`,
+        type: "plain_text",
+      },
+      type: "header",
+    },
+    {
+      elements: [
+        {
+          text: `Feedback from ${user}:`,
+          type: "mrkdwn",
+        },
+      ],
+      type: "context",
+    },
+    {
+      text: {
+        text: `Question: ${previousMessage?.text ?? "Unknown"}`,
+        type: "mrkdwn",
+      },
+      type: "section",
+    },
+    {
+      text: {
+        text: `Response: ${message.text ?? "Unknown"}`,
+        type: "mrkdwn",
+      },
+      type: "section",
+    },
+  ];
+  await iris.slack.client.chat.postMessage({
+    blocks:  blocks,
+    channel: channelId,
+    text:    "Feedback received!",
+  });
+  await respond({
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+    response_type: "ephemeral",
+    text:          `Thank you for your feedback, ${user}! You selected: ${feedbackType}`,
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+    thread_ts:     typeof message.thread_ts === "string"
+      ? message.thread_ts
+      : message.ts,
+  });
+};
