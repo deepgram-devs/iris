@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "dev": "op run --env-file=dev.env -- tsx src/index.ts",
     "build": "tsc",
     "start": "node prod/index.js",
     "lint": "eslint src test --max-warnings 0",

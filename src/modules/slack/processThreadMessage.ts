@@ -6,6 +6,7 @@
 
 import { errorHandler } from "../../utils/errorHandler.js";
 import { fetchSlackThreadMessages } from "../../utils/fetchThreadMessages.js";
+import { logger } from "../../utils/logger.js";
 import { makeAiRequestOnSlack } from "../../utils/makeAiRequest.js";
 import {
   trimSlackMessageFromElement,
@@ -34,6 +35,7 @@ export const processSlackThreadMessage = async(
   say: SayFn,
 ): Promise<void> => {
   try {
+    await logger(iris, `Processing Slack Thread Mention: ${JSON.stringify(message)}`);
     const { user } = await iris.slack.client.users.info({
       user: message.user,
     });

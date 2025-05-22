@@ -4,6 +4,7 @@
  * @author Naomi Carrigan
  */
 
+import { logger } from "../utils/logger.js";
 import type { Iris } from "../interfaces/iris.js";
 import type { RespondFn, BlockAction } from "@slack/bolt";
 
@@ -21,40 +22,52 @@ export const processFeedback = async(
   respond: RespondFn,
   feedbackType: "positive" | "negative",
 ): Promise<void> => {
-  const { message } = body;
+  const { message, channel, user: userObject } = body;
+  await logger(
+    iris,
+    `Processing feedback from ${userObject.username} in channel: ${
+      channel?.id ?? "no channel id"
+    } - ${channel?.name ?? "no channel name"} with message TS ${
+      String(message?.thread_ts ?? `${message?.ts ?? "what no ts"} but not in thread`)
+    } - sending to ${process.env.FEEDBACK_CHANNEL ?? "no feedback channel"}`,
+  );
   if (!message) {
     await respond({
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-      response_type: "ephemeral",
-      text:          "No message found in the feedback payload.",
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+      replace_original: false,
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+      response_type:    "ephemeral",
+      text:             "No message found in the feedback payload.",
     });
     return;
   }
+  const userInfo = await iris.slack.client.users.info({
+    user: userObject.id,
+  });
   const user
-    = typeof message.user === "string"
-      ? (
-        await iris.slack.client.users.info({
-          user: message.user,
-        })
-      // eslint-disable-next-line unicorn/no-await-expression-member -- Easier logic I think?
-      ).user?.profile?.display_name ?? "Unknown User"
-      : "Unknown User";
+    = userInfo.user?.profile?.display_name
+    ?? userInfo.user?.real_name
+    ?? userInfo.user?.name
+    ?? userObject.username;
   const channelId = process.env.FEEDBACK_CHANNEL;
   if (channelId === undefined) {
     await respond({
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-      response_type: "ephemeral",
-      text:          "Feedback channel not set in environment variables.",
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-      thread_ts:     typeof message.thread_ts === "string"
-        ? message.thread_ts
-        : message.ts,
+      replace_original: false,
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+      response_type:    "ephemeral",
+      text:             "Feedback channel not set in environment variables.",
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+      thread_ts:
+        typeof message.thread_ts === "string"
+          ? message.thread_ts
+          : message.ts,
     });
     return;
   }
   const previousMessageRequest = await iris.slack.client.conversations.replies({
-    channel: typeof message.channel === "string"
-      ? message.channel
+    channel: channel
+      ? channel.id
       : "Unknown",
     inclusive: false,
     latest:    message.ts,
@@ -63,7 +76,7 @@ export const processFeedback = async(
       ? message.thread_ts
       : message.ts,
   });
-  const previousMessage = previousMessageRequest.messages?.[0];
+  const previousMessage = previousMessageRequest.messages?.reverse()[0];
   const blocks = [
     {
       text: {
@@ -105,11 +118,14 @@ export const processFeedback = async(
   });
   await respond({
     // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-    response_type: "ephemeral",
-    text:          `Thank you for your feedback, ${user}! You selected: ${feedbackType}`,
+    replace_original: false,
     // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-    thread_ts:     typeof message.thread_ts === "string"
-      ? message.thread_ts
-      : message.ts,
+    response_type:    "ephemeral",
+    text:             `Thank you for your feedback, ${user}! You selected: ${feedbackType}`,
+    // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+    thread_ts:
+      typeof message.thread_ts === "string"
+        ? message.thread_ts
+        : message.ts,
   });
 };

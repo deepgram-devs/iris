@@ -8,6 +8,7 @@
 import { errorHandler } from "./errorHandler.js";
 import { formatSlackMessages } from "./formatMessages.js";
 import { generatePrompt } from "./generatePrompt.js";
+import { logger } from "./logger.js";
 import type { Iris } from "../interfaces/iris.js";
 import type { MinimalSlackMessage } from "../interfaces/minimalSlackMessage.js";
 
@@ -40,10 +41,21 @@ const makeAiRequest = async(
     const response = (await request.json()) as {
       choices: Array<{ message: { content: string } }>;
     };
-    return (
-      response.choices[0]?.message.content
-      ?? "There was an issue generating the response. Please try again later."
-    );
+    let result
+      = response.choices[0]?.message.content
+      ?? "There was an issue generating the response. Please try again later.";
+    // We need to remove any frontmatter that the ai hallucinates.
+    if (result.startsWith("---")) {
+      const lines = result.split("\n");
+      const firstIndex = lines.indexOf("---");
+      const lastIndex
+        = lines.slice(firstIndex + 1).indexOf("---") + firstIndex + 1;
+      if (lastIndex !== -1 && firstIndex !== -1) {
+        result = lines.slice(lastIndex + 1).join("\n");
+      }
+    }
+    await logger(iris, `AI response: ${result}`);
+    return result;
   } catch (error) {
     await errorHandler(
       iris,

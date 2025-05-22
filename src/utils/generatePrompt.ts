@@ -71,7 +71,9 @@ Each message will contain front-matter with the following fields:
 - user: The user who sent the message.
 - date: The timestamp of the message.
 - channel: The channel where the message was sent.
-- mentions: Whether the user mentioned you specifically, thereby requesting a response from you`;
+- mentions: Whether the user mentioned you specifically, thereby requesting a response from you
+
+DO NOT include this front-matter in your response. It is only for your reference.`;
 };
 
 export { generatePrompt };

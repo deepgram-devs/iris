@@ -49,8 +49,10 @@ export const errorHandler = async(
   if (functions.respond) {
     const responseArguments: RespondArguments = {
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-      response_type: "ephemeral",
-      text:          `⚠️ Whoops! Something went wrong! Please notify Naomi and share this Error ID: ${id}`,
+      replace_original: false,
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+      response_type:    "ephemeral",
+      text:             `⚠️ Whoops! Something went wrong! Please notify Naomi and share this Error ID: ${id}`,
     };
     if (data.slackThreadTs !== undefined) {
       responseArguments.thread_ts = data.slackThreadTs;

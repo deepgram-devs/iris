@@ -5,6 +5,7 @@
  */
 
 import { errorHandler } from "../../utils/errorHandler.js";
+import { logger } from "../../utils/logger.js";
 import { makeAiRequestOnSlack } from "../../utils/makeAiRequest.js";
 import { trimSlackMessageFromEvent } from "../../utils/trimSlackMessage.js";
 import { generateFeedbackBlocks } from "../blocks/generateFeedbackBlocks.js";
@@ -28,6 +29,7 @@ export const processSlackMentionMessage = async(
   say: SayFn,
 ): Promise<void> => {
   try {
+    await logger(iris, `Processing Slack Mention: ${JSON.stringify(message)}`);
     const { user } = await iris.slack.client.users.info({
       user: message.user,
     });

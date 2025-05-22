@@ -8,7 +8,7 @@ WORKDIR /app
 COPY . .
 
 # Install dependencies and build the bot
-RUN pnpm install && pnpm build
+RUN npm i -g pnpm && pnpm install && pnpm build
 
 # Run the bot application
 CMD ["pnpm", "start"]

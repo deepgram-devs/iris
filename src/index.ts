@@ -3,7 +3,7 @@
  * @license MIT
  * @author Naomi Carrigan
  */
-import { App } from "@slack/bolt";
+import slackBolt from "@slack/bolt";
 import { mountSlackEvents } from "./events/mountSlackEvents.js";
 import { logger } from "./utils/logger.js";
 import type { Iris } from "./interfaces/iris.js";
@@ -17,7 +17,8 @@ if (
     "SLACK_SIGNING_SECRET and SLACK_BOT_TOKEN must be set in the environment variables.",
   );
 }
-
+// eslint-disable-next-line @typescript-eslint/naming-convention -- It's a class.
+const { App } = slackBolt;
 const iris: Iris = {
   slack: new App({
     signingSecret: process.env.SLACK_SIGNING_SECRET,

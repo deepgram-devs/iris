@@ -25,9 +25,11 @@ export const handleForwardFeedback: SlackActionCallback = async(
   try {
     await respond({
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-      response_type: "ephemeral",
+      replace_original: false,
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+      response_type:    "ephemeral",
       // eslint-disable-next-line stylistic/max-len -- Long string.
-      text:          "I'm sorry, but this feature is not yet implemented. Please check back later.",
+      text:             "I'm sorry, but this feature is not yet implemented. Please check back later.",
     });
   } catch (error) {
     await errorHandler(
