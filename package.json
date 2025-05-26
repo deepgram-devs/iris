@@ -1,0 +1,33 @@
+{
+  "name": "iris",
+  "version": "0.0.0",
+  "description": "A Slack and Discord bot powered by our Gnosis service.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "op run --env-file=dev.env -- tsx src/index.ts",
+    "build": "tsc",
+    "start": "node prod/index.js",
+    "lint": "eslint src test --max-warnings 0",
+    "test": "vitest run --coverage"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.10.0",
+  "devDependencies": {
+    "@nhcarrigan/eslint-config": "5.2.0",
+    "@nhcarrigan/typescript-config": "4.0.0",
+    "@vitest/coverage-istanbul": "3.1.4",
+    "eslint": "9.27.0",
+    "tsx": "4.19.4",
+    "typescript": "5.8.3",
+    "vitest": "3.1.4"
+  },
+  "dependencies": {
+    "@slack/bolt": "4.4.0",
+    "@slack/web-api": "7.9.2",
+    "discord.js": "14.19.3",
+    "short-unique-id": "5.3.2"
+  }
+}

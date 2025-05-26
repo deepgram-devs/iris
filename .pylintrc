@@ -1,6 +1,0 @@
-[MESSAGES CONTROL]
-disable=
-    W0718,   # broad-exception-caught
-    C0114,  # missing-module-docstring
-    R0801,  # duplicate-code
-    C0301,  # line-too-long

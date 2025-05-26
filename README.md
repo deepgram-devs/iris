@@ -9,32 +9,30 @@ Currently the application is in private beta during our early development stages
 ## Development
 
 > [!TIP]
-> We use the 1Password CLI to manage secrets. If you do not have a 1Password account, you will want to install and load the `python-dotenv` package.
+> We use the 1Password CLI to manage secrets. If you do not have a 1Password account, you will want to install and load the `dotenv` package.
 
 To get started, clone the repository and install the dependencies:
 
 ```py
-pipenv install --dev
+pnpm install
 ```
 
 Then you can start the application in development (watch) mode:
 
 ```py
-pipenv run dev
+pnpm run dev
 ```
 
 We expect that all contributions pass our linter and formatting requirements:
 
 ```py
-pipenv run lint
-pipenv run format # To automatically format all files
-pipenv run format_check # To confirm formatting passes
+pnpm run lint
 ```
 
 Additionally, all changes should include comprehensive test coverage. Total coverage should never dip below 90%.
 
 ```py
-pipenv run test
+pnpm run test
 ```
 
 When installing new dependencies, we expect that all packages are pinned to a specific version. You should not have any `package = "*"` lines in the Pipfile.
