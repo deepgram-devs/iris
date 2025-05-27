@@ -6,11 +6,15 @@
 /* eslint-disable @typescript-eslint/naming-convention -- There's enough properties in here that cannot be camelCase we may as well turn the rule off entirely.*/
 
 import { errorHandler } from "./errorHandler.js";
-import { formatSlackMessages } from "./formatMessages.js";
+import {
+  formatDiscordMessages,
+  formatSlackMessages,
+} from "./formatMessages.js";
 import { generatePrompt } from "./generatePrompt.js";
 import { logger } from "./logger.js";
 import type { Iris } from "../interfaces/iris.js";
 import type { MinimalSlackMessage } from "../interfaces/minimalSlackMessage.js";
+import type { Message } from "discord.js";
 
 const makeAiRequest = async(
   iris: Iris,
@@ -76,7 +80,7 @@ const makeAiRequest = async(
  * @param username - The user whose message triggered an AI request.
  * @returns The response from Gnosis.
  */
-export const makeAiRequestOnSlack = async(
+const makeAiRequestOnSlack = async(
   iris: Iris,
   messages: Array<MinimalSlackMessage>,
   channelName: string,
@@ -100,3 +104,39 @@ export const makeAiRequestOnSlack = async(
   const result = await makeAiRequest(iris, allMessages);
   return result;
 };
+
+/**
+ * Formats an array of Discord messages, prepends a system message with our
+ * generated prompt, and requests a chat completion from Gnosis.
+ * @param iris - Iris' instance.
+ * @param messages - The discord messages to include as the conversation.
+ * @param channelName - The name of the channel the conversation occurred in.
+ * @param username - The user whose message triggered an AI request.
+ * @returns The response from Gnosis.
+ */
+const makeAiRequestOnDiscord = async(
+  iris: Iris,
+  messages: Array<Message<true>>,
+  channelName: string,
+  username: string,
+): Promise<string> => {
+  const irisUser = iris.discord.user;
+  const irisUserId = irisUser?.id;
+  const formattedMessages = formatDiscordMessages(
+    messages,
+    channelName,
+    username,
+    irisUserId ?? "Unknown User",
+  );
+  const allMessages = [
+    {
+      content: generatePrompt(username, "discord"),
+      role:    "system",
+    },
+    ...formattedMessages,
+  ];
+  const result = await makeAiRequest(iris, allMessages);
+  return result;
+};
+
+export { makeAiRequestOnSlack, makeAiRequestOnDiscord };
