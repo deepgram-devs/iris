@@ -7,6 +7,7 @@
 import {
   ActionRowBuilder,
   ButtonBuilder,
+  ButtonStyle,
   type MessageCreateOptions,
 } from "discord.js";
 
@@ -21,10 +22,12 @@ export const appendFeedbackButtons = (
 ): MessageCreateOptions => {
   const positiveButton = new ButtonBuilder().
     setCustomId("feedback-positive").
-    setLabel("👍🏻");
+    setLabel("👍🏻").
+    setStyle(ButtonStyle.Success);
   const negativeButton = new ButtonBuilder().
     setCustomId("feedback-negative").
-    setLabel("👎🏻");
+    setLabel("👎🏻").
+    setStyle(ButtonStyle.Danger);
   const row = new ActionRowBuilder<ButtonBuilder>().addComponents(
     positiveButton,
     negativeButton,

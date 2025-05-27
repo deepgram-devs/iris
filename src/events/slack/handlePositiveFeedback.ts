@@ -4,7 +4,7 @@
  * @author Naomi Carrigan
  */
 
-import { processFeedback } from "../../modules/processFeedback.js";
+import { processSlackFeedback } from "../../modules/processFeedback.js";
 import { errorHandler } from "../../utils/errorHandler.js";
 import type { SlackActionCallback }
   from "../../interfaces/slackEventCallbacks.js";
@@ -24,7 +24,7 @@ export const handlePositiveFeedback: SlackActionCallback
      if (!("message" in body)) {
        return;
      }
-     await processFeedback(iris, body, respond, "positive");
+     await processSlackFeedback(iris, body, respond, "positive");
    } catch (error) {
      await errorHandler(
        iris,

@@ -7,6 +7,7 @@
 import { logger } from "../utils/logger.js";
 import type { Iris } from "../interfaces/iris.js";
 import type { RespondFn, BlockAction } from "@slack/bolt";
+import type { ButtonInteraction } from "discord.js";
 
 /**
  * Grabs the question and answer that are associated with user
@@ -16,7 +17,7 @@ import type { RespondFn, BlockAction } from "@slack/bolt";
  * @param respond - The function to send a message back to the user.
  * @param feedbackType - Whether the feedback is "positive" or "negative".
  */
-export const processFeedback = async(
+const processSlackFeedback = async(
   iris: Iris,
   body: BlockAction,
   respond: RespondFn,
@@ -129,3 +130,77 @@ export const processFeedback = async(
         : message.ts,
   });
 };
+
+/**
+ * Grabs the question and answer that are associated with user
+ * feedback and sends them to the feedback channel.
+ * @param iris - Iris's instance.
+ * @param interaction - The Discord button interaction.
+ * @param feedbackType - Whether the feedback is "positive" or "negative".
+ */
+const processDiscordFeedback = async(
+  iris: Iris,
+  interaction: ButtonInteraction,
+  feedbackType: "positive" | "negative",
+): Promise<void> => {
+  const { message, user, channel } = interaction;
+  await logger(
+    iris,
+    `Processing Discord feedback from ${user.username} with message ID: ${message.id}`,
+  );
+  const slackChannelId = process.env.FEEDBACK_CHANNEL;
+  if (slackChannelId === undefined) {
+    await interaction.editReply({
+      content: "Feedback channel not set in environment variables.",
+    });
+    return;
+  }
+  const previousMessages = await channel?.messages.fetch({
+    before: message.id,
+    limit:  1,
+  });
+  const blocks = [
+    {
+      text: {
+        text: `${
+          feedbackType.charAt(0).toUpperCase() + feedbackType.slice(1)
+        } Feedback`,
+        type: "plain_text",
+      },
+      type: "header",
+    },
+    {
+      elements: [
+        {
+          text: `Feedback from ${user.displayName}:`,
+          type: "mrkdwn",
+        },
+      ],
+      type: "context",
+    },
+    {
+      text: {
+        text: `Question: ${previousMessages?.first()?.content ?? "Unknown"}`,
+        type: "mrkdwn",
+      },
+      type: "section",
+    },
+    {
+      text: {
+        text: `Response: ${message.content}`,
+        type: "mrkdwn",
+      },
+      type: "section",
+    },
+  ];
+  await iris.slack.client.chat.postMessage({
+    blocks:  blocks,
+    channel: slackChannelId,
+    text:    "Feedback received!",
+  });
+  await interaction.editReply({
+    content: `Thank you for your feedback, ${user.username}! You selected: ${feedbackType}`,
+  });
+};
+
+export { processSlackFeedback, processDiscordFeedback };

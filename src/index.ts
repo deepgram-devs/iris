@@ -5,6 +5,7 @@
  */
 import slackBolt from "@slack/bolt";
 import { Client, GatewayIntentBits } from "discord.js";
+import { mountDiscordEvents } from "./events/mountDiscordEvents.js";
 import { mountSlackEvents } from "./events/mountSlackEvents.js";
 import { logger } from "./utils/logger.js";
 import type { Iris } from "./interfaces/iris.js";
@@ -36,6 +37,7 @@ const iris: Iris = {
 };
 
 mountSlackEvents(iris);
+mountDiscordEvents(iris);
 
 await iris.discord.login(process.env.DISCORD_BOT_TOKEN);
 
