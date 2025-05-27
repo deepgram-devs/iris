@@ -5,7 +5,9 @@
  */
 
 import type { App } from "@slack/bolt";
+import type { Client } from "discord.js";
 
 export interface Iris {
-  slack: App;
+  slack:   App;
+  discord: Client;
 }

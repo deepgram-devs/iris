@@ -4,7 +4,12 @@
  * @author Naomi Carrigan
  */
 
-// eslint-disable-next-line @typescript-eslint/naming-convention -- Importing a class.
+import {
+  MessageFlags,
+  type AutocompleteInteraction,
+  type Interaction,
+  type Message,
+} from "discord.js";
 import ShortUniqueId from "short-unique-id";
 import { logger } from "./logger.js";
 import type { Iris } from "../interfaces/iris.js";
@@ -28,7 +33,11 @@ import type {
  * @param functions - Functions to respond to the user.
  * @param functions.respond - Slack's respond function.
  * @param functions.say - Slack's say function.
+ * @param functions.msgReply - The reply method of a Discord message object.
+ * @param functions.interactionReply - The reply method of a Discord interaction object.
+ * @param functions.editReply - The edit reply method of a Discord interaction object.
  */
+// eslint-disable-next-line max-statements -- This function is expected to be long.
 export const errorHandler = async(
   iris: Iris,
   data: {
@@ -37,7 +46,13 @@ export const errorHandler = async(
     slackChannelId?: string;
     slackThreadTs?:  string | undefined;
   },
-  functions: { respond?: RespondFn; say?: SayFn },
+  functions: {
+    respond?:          RespondFn;
+    say?:              SayFn;
+    msgReply?:         Message["reply"];
+    interactionReply?: Exclude<Interaction, AutocompleteInteraction>["reply"];
+    editReply?:        Exclude<Interaction, AutocompleteInteraction>["editReply"];
+  },
 ): Promise<void> => {
   const id = new ShortUniqueId({ length: 16 }).rnd();
   await logger(iris, `Error ID: ${id}`);
@@ -71,5 +86,21 @@ export const errorHandler = async(
       sayArguments.thread_ts = data.slackThreadTs;
     }
     await functions.say(sayArguments);
+  }
+  if (functions.msgReply) {
+    await functions.msgReply({
+      content: `⚠️ Whoops! Something went wrong! Please notify Naomi and share this Error ID: ${id}`,
+    });
+  }
+  if (functions.interactionReply) {
+    await functions.interactionReply({
+      content: `⚠️ Whoops! Something went wrong! Please notify Naomi and share this Error ID: ${id}`,
+      flags:   [ MessageFlags.Ephemeral ],
+    });
+  }
+  if (functions.editReply) {
+    await functions.editReply({
+      content: `⚠️ Whoops! Something went wrong! Please notify Naomi and share this Error ID: ${id}`,
+    });
   }
 };

@@ -5,6 +5,7 @@
  */
 
 import type { MinimalSlackMessage } from "../interfaces/minimalSlackMessage.js";
+import type { Message } from "discord.js";
 
 /**
  * Attaches frontmatter to a Slack message. Data included are
@@ -46,4 +47,36 @@ mentions: ${mentionsIris
 ${message.text}`;
 };
 
-export { appendSlackFrontmatter };
+/**
+ * Attaches frontmatter to a Discord message. Data included are
+ * username, date, channel name, and whether the message mentions Iris.
+ * These data are consumed by Gnosis.
+ * @param message - The message to attach frontmatter to.
+ * @param channelName - The name of the channel the message was sent in.
+ * @param username - The username of the person who sent the message.
+ * @param irisId - Iris' bot id.
+ * @returns The message with frontmatter attached.
+ */
+const appendDiscordFrontmatter = (
+  message: Message<true>,
+  channelName: string,
+  username: string,
+  irisId: string,
+): string => {
+  const date = new Date(
+    message.createdTimestamp,
+  ).toISOString();
+  const mentionsIris = new RegExp(`<@!?${irisId}>`, "g").test(message.content);
+  return `---
+user: ${username}
+date: ${date}
+channel: ${channelName}
+mentions: ${mentionsIris
+  ? "yes"
+  : "no"}
+---
+
+${message.content}`;
+};
+
+export { appendSlackFrontmatter, appendDiscordFrontmatter };

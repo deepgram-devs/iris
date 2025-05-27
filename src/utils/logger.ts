@@ -4,6 +4,7 @@
  * @author Naomi Carrigan
  */
 
+import { WebhookClient } from "discord.js";
 import type { Iris } from "../interfaces/iris.js";
 
 /**
@@ -17,6 +18,17 @@ export const logger = async(iris: Iris, message: string): Promise<void> => {
     await iris.slack.client.chat.postMessage({
       channel: channel,
       text:    message,
+    });
+  }
+  const hook = process.env.DISCORD_WEBHOOK;
+  if (hook !== undefined) {
+    const client = new WebhookClient({
+      url: hook,
+    });
+    await client.send({
+      avatarURL: "https://cdn.nhcarrigan.com/new-avatars/iris.png",
+      content:   message,
+      username:  "Iris Logger",
     });
   }
 };
