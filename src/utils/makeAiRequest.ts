@@ -6,7 +6,10 @@
 /* eslint-disable @typescript-eslint/naming-convention -- There's enough properties in here that cannot be camelCase we may as well turn the rule off entirely.*/
 
 import { errorHandler } from "./errorHandler.js";
-import { formatDiscordMessages, formatSlackMessages } from "./formatMessages.js";
+import {
+  formatDiscordMessages,
+  formatSlackMessages,
+} from "./formatMessages.js";
 import { generatePrompt } from "./generatePrompt.js";
 import { logger } from "./logger.js";
 import type { Iris } from "../interfaces/iris.js";
@@ -116,7 +119,7 @@ const makeAiRequestOnDiscord = async(
   messages: Array<Message<true>>,
   channelName: string,
   username: string,
-) => {
+): Promise<string> => {
   const irisUser = iris.discord.user;
   const irisUserId = irisUser?.id;
   const formattedMessages = formatDiscordMessages(

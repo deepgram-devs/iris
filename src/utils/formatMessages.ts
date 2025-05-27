@@ -4,7 +4,10 @@
  * @author Naomi Carrigan
  */
 
-import { appendDiscordFrontmatter, appendSlackFrontmatter } from "../modules/appendFrontmatter.js";
+import {
+  appendDiscordFrontmatter,
+  appendSlackFrontmatter,
+} from "../modules/appendFrontmatter.js";
 import type { MinimalSlackMessage } from "../interfaces/minimalSlackMessage.js";
 import type { Message } from "discord.js";
 

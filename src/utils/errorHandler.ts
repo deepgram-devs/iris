@@ -10,6 +10,7 @@ import {
   type Interaction,
   type Message,
 } from "discord.js";
+// eslint-disable-next-line @typescript-eslint/naming-convention -- Importing a class.
 import ShortUniqueId from "short-unique-id";
 import { logger } from "./logger.js";
 import type { Iris } from "../interfaces/iris.js";
@@ -51,7 +52,8 @@ export const errorHandler = async(
     say?:              SayFn;
     msgReply?:         Message["reply"];
     interactionReply?: Exclude<Interaction, AutocompleteInteraction>["reply"];
-    editReply?:        Exclude<Interaction, AutocompleteInteraction>["editReply"];
+    editReply?:
+    Exclude<Interaction, AutocompleteInteraction>["editReply"];
   },
 ): Promise<void> => {
   const id = new ShortUniqueId({ length: 16 }).rnd();
