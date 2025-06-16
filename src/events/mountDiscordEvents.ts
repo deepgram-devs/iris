@@ -8,7 +8,7 @@ import { Events } from "discord.js";
 import { logger } from "../utils/logger.js";
 import { handleInteractionCreate } from "./discord/handleInteractionCreate.js";
 import { handleMessageCreate } from "./discord/handleMessageCreate.js";
-import { handleThreadCreate } from "./discord/handleThreadCreate.js";
+// import { handleThreadCreate } from "./discord/handleThreadCreate.js";
 import type { Iris } from "../interfaces/iris.js";
 
 /**
@@ -20,9 +20,9 @@ export const mountDiscordEvents = (iris: Iris): void => {
     void logger(iris, "⚡️ Discord bot is ready");
   });
 
-  iris.discord.on(Events.ThreadCreate, (thread) => {
-    void handleThreadCreate(iris, thread);
-  });
+  // iris.discord.on(Events.ThreadCreate, (thread) => {
+  //   void handleThreadCreate(iris, thread);
+  // });
 
   iris.discord.on(Events.MessageCreate, (message) => {
     void handleMessageCreate(iris, message);
