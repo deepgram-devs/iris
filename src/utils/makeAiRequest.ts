@@ -4,6 +4,7 @@
  * @author Naomi Carrigan
  */
 /* eslint-disable @typescript-eslint/naming-convention -- There's enough properties in here that cannot be camelCase we may as well turn the rule off entirely.*/
+/* eslint-disable @typescript-eslint/max-params -- Naomi be lazy. */
 
 import { errorHandler } from "./errorHandler.js";
 import {
@@ -19,6 +20,7 @@ import type { Message } from "discord.js";
 const makeAiRequest = async(
   iris: Iris,
   messages: Array<{ role: string; content: string }>,
+  apiKey: string,
 ): Promise<string> => {
   try {
     const request = await fetch(
@@ -31,7 +33,7 @@ const makeAiRequest = async(
           temperature:     1,
         }),
         headers: {
-          "Authorization": `Bearer ${process.env.GNOSIS_TOKEN ?? ""}`,
+          "Authorization": `Bearer ${apiKey}`,
           "Content-Type":  "application/json",
         },
         method: "POST",
@@ -78,6 +80,7 @@ const makeAiRequest = async(
  * @param messages - The slack messages to include as the conversation.
  * @param channelName - The name of the channel the conversation occurred in.
  * @param username - The user whose message triggered an AI request.
+ * @param apiKey - The Deepgram API key to authenticate the request with.
  * @returns The response from Gnosis.
  */
 const makeAiRequestOnSlack = async(
@@ -85,6 +88,7 @@ const makeAiRequestOnSlack = async(
   messages: Array<MinimalSlackMessage>,
   channelName: string,
   username: string,
+  apiKey: string,
 ): Promise<string> => {
   const irisUser = await iris.slack.client.auth.test();
   const irisUserId = irisUser.user_id;
@@ -101,7 +105,7 @@ const makeAiRequestOnSlack = async(
     },
     ...formattedMessages,
   ];
-  const result = await makeAiRequest(iris, allMessages);
+  const result = await makeAiRequest(iris, allMessages, apiKey);
   return result;
 };
 
@@ -112,6 +116,7 @@ const makeAiRequestOnSlack = async(
  * @param messages - The discord messages to include as the conversation.
  * @param channelName - The name of the channel the conversation occurred in.
  * @param username - The user whose message triggered an AI request.
+ * @param apiKey - The Deepgram API key to authenticate the request with.
  * @returns The response from Gnosis.
  */
 const makeAiRequestOnDiscord = async(
@@ -119,6 +124,7 @@ const makeAiRequestOnDiscord = async(
   messages: Array<Message<true>>,
   channelName: string,
   username: string,
+  apiKey: string,
 ): Promise<string> => {
   const irisUser = iris.discord.user;
   const irisUserId = irisUser?.id;
@@ -135,7 +141,7 @@ const makeAiRequestOnDiscord = async(
     },
     ...formattedMessages,
   ];
-  const result = await makeAiRequest(iris, allMessages);
+  const result = await makeAiRequest(iris, allMessages, apiKey);
   return result;
 };
 

@@ -24,7 +24,9 @@ export const mountSlackEvents = (iris: Iris): void => {
   iris.slack.action("forward-feedback", async({ ack, body, respond }) => {
     await handleForwardFeedback(iris, ack, body, respond);
   });
-  iris.slack.message(async({ message, say }) => {
-    await handleSlackMessage(iris, message, say);
+  iris.slack.message(async({ message, say, context }) => {
+    // The workspace (team) id is available as `team`
+    const { teamId } = context;
+    await handleSlackMessage(iris, message, say, teamId);
   });
 };

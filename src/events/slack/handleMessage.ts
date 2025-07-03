@@ -21,11 +21,13 @@ import type { SlackMessageCallback }
  * @param iris - Iris's instance.
  * @param message - The message payload from Slack.
  * @param say - The function to send a message back to the user.
+ * @param teamId - The ID of the Slack team (workspace) the message is from.
  */
 export const handleSlackMessage: SlackMessageCallback = async(
   iris,
   message,
   say,
+  teamId,
 ) => {
   try {
     if (message.subtype !== undefined && message.subtype !== "file_share") {

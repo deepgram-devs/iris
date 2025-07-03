@@ -20,4 +20,7 @@ export default [
       "complexity": "off"
     },
   },
+  {
+    ignores: ["src/interfaces/supabase.ts"]
+  }
 ];

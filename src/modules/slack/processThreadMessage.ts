@@ -6,6 +6,7 @@
 
 import { errorHandler } from "../../utils/errorHandler.js";
 import { fetchSlackThreadMessages } from "../../utils/fetchThreadMessages.js";
+import { getSlackApiKey } from "../../utils/getApiKey.js";
 import { logger } from "../../utils/logger.js";
 import { makeAiRequestOnSlack } from "../../utils/makeAiRequest.js";
 import {
@@ -25,6 +26,7 @@ import type {
  * @param iris - Iris's instance.
  * @param message - The message payload from Slack.
  * @param say - The function to send a message back to the user.
+ * @param teamId - The ID of the Slack team (workspace) the message is from.
  */
 export const processSlackThreadMessage = async(
   iris: Iris,
@@ -33,12 +35,28 @@ export const processSlackThreadMessage = async(
     thread_ts: string;
   },
   say: SayFn,
+  teamId?: string,
 ): Promise<void> => {
   try {
-    await logger(iris, `Processing Slack Thread Mention: ${JSON.stringify(message)}`);
+    await logger(
+      iris,
+      `Processing Slack Thread Mention: ${JSON.stringify(message)}`,
+    );
+    if (teamId === undefined) {
+      await say("I could not find your workspace ID. Please try again.");
+      return;
+    }
     const { user } = await iris.slack.client.users.info({
       user: message.user,
     });
+    const apiKey = await getSlackApiKey(iris, teamId);
+    if (apiKey === null) {
+      await say(
+        // eslint-disable-next-line stylistic/max-len -- Long string.
+        "I could not determine how to authenticate this request. Please try again.",
+      );
+      return;
+    }
     const username
       = user?.profile?.display_name ?? user?.real_name ?? "Unknown User";
     const { channel } = await iris.slack.client.conversations.info({
@@ -66,6 +84,7 @@ export const processSlackThreadMessage = async(
       [ ...parsedPreviousMessages, trimSlackMessageFromEvent(message) ],
       channelName,
       username,
+      apiKey,
     );
     await say({
       blocks:    generateFeedbackBlocks(response),

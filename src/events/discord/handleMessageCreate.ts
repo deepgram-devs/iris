@@ -7,6 +7,7 @@
 import { appendFeedbackButtons }
   from "../../modules/discord/appendFeedbackButtons.js";
 import { errorHandler } from "../../utils/errorHandler.js";
+import { getDiscordApiKey } from "../../utils/getApiKey.js";
 import { makeAiRequestOnDiscord } from "../../utils/makeAiRequest.js";
 import type { Iris } from "../../interfaces/iris.js";
 import type { Message } from "discord.js";
@@ -29,13 +30,21 @@ export const handleMessageCreate = async(
       await message.reply("Sorry, but DMs are not supported at this time.");
       return;
     }
+    const apiKey = await getDiscordApiKey(iris, message.guild.id);
+    if (apiKey === null) {
+      await message.reply(
+        // eslint-disable-next-line stylistic/max-len -- Long string.
+        "Sorry, but I could not determine how to authenticate this request. Please try again.",
+      );
+      return;
+    }
     if (!message.channel.isThread()) {
       const result = await makeAiRequestOnDiscord(
         iris,
         [ message ],
         message.channel.name,
         message.author.displayName,
-
+        apiKey,
       );
       const thread = await message.startThread({
         autoArchiveDuration: 60,
@@ -52,6 +61,7 @@ export const handleMessageCreate = async(
       [ ...previousMessages.values() ],
       message.channel.name,
       message.author.displayName,
+      apiKey,
     );
     await message.reply(appendFeedbackButtons(result));
   } catch (error) {

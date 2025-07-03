@@ -26,6 +26,7 @@ type SlackMessageCallback = (
   iris: Iris,
   message: KnownEventFromType<"message">,
   say: SayFn,
+  teamId?: string
 )=> Promise<void>;
 
 export type { SlackActionCallback, SlackMessageCallback };

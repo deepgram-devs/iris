@@ -5,6 +5,7 @@
  */
 import slackBolt from "@slack/bolt";
 import { Client, GatewayIntentBits } from "discord.js";
+import { getSupabase } from "./database/supabase.js";
 import { mountDiscordEvents } from "./events/mountDiscordEvents.js";
 import { mountSlackEvents } from "./events/mountSlackEvents.js";
 import { logger } from "./utils/logger.js";
@@ -22,7 +23,10 @@ if (
 }
 // eslint-disable-next-line @typescript-eslint/naming-convention -- It's a class.
 const { App } = slackBolt;
+
+const database = await getSupabase();
 const iris: Iris = {
+  db:      database,
   discord: new Client({
     intents: [
       GatewayIntentBits.Guilds,
