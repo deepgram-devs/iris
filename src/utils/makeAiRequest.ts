@@ -81,6 +81,7 @@ const makeAiRequest = async(
  * @param channelName - The name of the channel the conversation occurred in.
  * @param username - The user whose message triggered an AI request.
  * @param apiKey - The Deepgram API key to authenticate the request with.
+ * @param token - The Slack bot token to authenticate the request with.
  * @returns The response from Gnosis.
  */
 const makeAiRequestOnSlack = async(
@@ -89,8 +90,9 @@ const makeAiRequestOnSlack = async(
   channelName: string,
   username: string,
   apiKey: string,
+  token: string,
 ): Promise<string> => {
-  const irisUser = await iris.slack.client.auth.test();
+  const irisUser = await iris.slack.client.auth.test({ token });
   const irisUserId = irisUser.user_id;
   const formattedMessages = formatSlackMessages(
     messages,

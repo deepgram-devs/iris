@@ -20,11 +20,13 @@ const fetchSlackThreadMessages = async(
   iris: Iris,
   channelId: string,
   threadTs: string,
+  token: string,
 ): Promise<Array<MessageElement>> => {
   try {
     const result = await iris.slack.client.conversations.replies({
       channel: channelId,
       ts:      threadTs,
+      token : token,
     });
 
     if (!result.ok) {

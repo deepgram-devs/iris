@@ -10,6 +10,7 @@ import { processSlackMentionMessage }
 import { processSlackThreadMessage }
   from "../../modules/slack/processThreadMessage.js";
 import { errorHandler } from "../../utils/errorHandler.js";
+import { logger } from "../../utils/logger.js";
 import { isSlackMessageInThread } from "../../utils/typeguards.js";
 import type { SlackMessageCallback }
   from "../../interfaces/slackEventCallbacks.js";
@@ -23,6 +24,7 @@ import type { SlackMessageCallback }
  * @param say - The function to send a message back to the user.
  * @param teamId - The ID of the Slack team (workspace) the message is from.
  */
+// eslint-disable-next-line max-statements -- This function is long, but it handles multiple cases.
 export const handleSlackMessage: SlackMessageCallback = async(
   iris,
   message,
@@ -35,13 +37,22 @@ export const handleSlackMessage: SlackMessageCallback = async(
     }
     if (message.channel_type === "im") {
       if (isSlackMessageInThread(message)) {
-        await processSlackThreadMessage(iris, message, say);
+        await processSlackThreadMessage(iris, message, say, teamId);
         return;
       }
-      await processSlackDmMessage(iris, message, say);
+      await processSlackDmMessage(iris, message, say, teamId);
       return;
     }
-    const uuid = `<@${process.env.BOT_USER_ID ?? ""}>`;
+    const installation = await iris.store.fetchInstallation({
+      enterpriseId:        undefined,
+      isEnterpriseInstall: false,
+      teamId:              teamId ?? "",
+    });
+    const uuid = `<@${installation.bot?.userId ?? process.env.BOT_USER_ID ?? ""}>`;
+    await logger(
+      iris,
+      `Received message event in ${teamId ?? "unknown team"}, checking for mention of \`${installation.bot?.userId ?? process.env.BOT_USER_ID ?? ""}\``,
+    );
     if (message.text === undefined) {
       return;
     }
@@ -49,10 +60,10 @@ export const handleSlackMessage: SlackMessageCallback = async(
       return;
     }
     if (isSlackMessageInThread(message)) {
-      await processSlackThreadMessage(iris, message, say);
+      await processSlackThreadMessage(iris, message, say, teamId);
       return;
     }
-    await processSlackMentionMessage(iris, message, say);
+    await processSlackMentionMessage(iris, message, say, teamId);
   } catch (error) {
     await errorHandler(
       iris,
@@ -60,6 +71,7 @@ export const handleSlackMessage: SlackMessageCallback = async(
         error:          error,
         message:        "Error in handleSlackMessage",
         slackChannelId: message.channel,
+        teamId:         teamId,
       },
       { say },
     );

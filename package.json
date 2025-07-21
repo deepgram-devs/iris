@@ -20,6 +20,7 @@
     "@nhcarrigan/typescript-config": "4.0.0",
     "@vitest/coverage-istanbul": "3.1.4",
     "eslint": "9.27.0",
+    "supabase": "2.31.4",
     "tsx": "4.19.4",
     "typescript": "5.8.3",
     "vitest": "3.1.4"

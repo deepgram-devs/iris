@@ -12,6 +12,7 @@ import {
 } from "discord.js";
 // eslint-disable-next-line @typescript-eslint/naming-convention -- Importing a class.
 import ShortUniqueId from "short-unique-id";
+import { getWorkspaceBotToken } from "./getWorkspaceBotToken.js";
 import { logger } from "./logger.js";
 import type { Iris } from "../interfaces/iris.js";
 import type {
@@ -31,6 +32,7 @@ import type {
  * @param data.message - A description of where the error occurred.
  * @param data.slackChannelId - The Slack channel ID to respond in.
  * @param data.slackThreadTs - The Slack thread timestamp to respond in.
+ * @param data.teamId - The ID of the Slack team (workspace) the error occurred in.
  * @param functions - Functions to respond to the user.
  * @param functions.respond - Slack's respond function.
  * @param functions.say - Slack's say function.
@@ -46,6 +48,7 @@ export const errorHandler = async(
     message:         string;
     slackChannelId?: string;
     slackThreadTs?:  string | undefined;
+    teamId?:         string | undefined;
   },
   functions: {
     respond?:          RespondFn;
@@ -64,12 +67,18 @@ export const errorHandler = async(
     await logger(iris, `Error stack: ${data.error.stack ?? "No stack trace"}`);
   }
   if (functions.respond) {
+    const botToken = data.teamId === undefined
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- We know this exists, we would never get here otherwise.
+      ? process.env.SLACK_BOT_TOKEN as string
+      : await getWorkspaceBotToken(iris, data.teamId);
+
     const responseArguments: RespondArguments = {
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
       replace_original: false,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
       response_type:    "ephemeral",
       text:             `⚠️ Whoops! Something went wrong! Please notify Naomi and share this Error ID: ${id}`,
+      token:            botToken,
     };
     if (data.slackThreadTs !== undefined) {
       responseArguments.thread_ts = data.slackThreadTs;

@@ -6,6 +6,7 @@
 
 import { errorHandler } from "../../utils/errorHandler.js";
 import { getSlackApiKey } from "../../utils/getApiKey.js";
+import { getWorkspaceBotToken } from "../../utils/getWorkspaceBotToken.js";
 import { logger } from "../../utils/logger.js";
 import { makeAiRequestOnSlack } from "../../utils/makeAiRequest.js";
 import { trimSlackMessageFromEvent } from "../../utils/trimSlackMessage.js";
@@ -36,15 +37,18 @@ export const processSlackDmMessage = async(
       await say("I could not find your workspace ID. Please try again.");
       return;
     }
+    const botToken = await getWorkspaceBotToken(iris, teamId);
     const { user } = await iris.slack.client.users.info({
-      user: message.user,
+      token: botToken,
+      user:  message.user,
     });
     const apiKey = await getSlackApiKey(iris, teamId);
     if (apiKey === null) {
-      await say(
+      await say({
         // eslint-disable-next-line stylistic/max-len -- Long string.
-        "I could not determine how to authenticate this request. Please try again.",
-      );
+        text:  "I could not determine how to authenticate this request. Please try again.",
+        token: botToken,
+      });
       return;
     }
     const username
@@ -56,13 +60,14 @@ export const processSlackDmMessage = async(
       channelName,
       username,
       apiKey,
+      botToken,
     );
     await say({
       blocks:    generateFeedbackBlocks(response),
-      channel:   message.channel,
       text:      response,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
       thread_ts: message.ts,
+      token:     botToken,
     });
   } catch (error) {
     await errorHandler(
@@ -72,6 +77,7 @@ export const processSlackDmMessage = async(
         message:        "Error in processSlackDmMessage",
         slackChannelId: message.channel,
         slackThreadTs:  message.ts,
+        teamId:         teamId,
       },
       {
         say,
