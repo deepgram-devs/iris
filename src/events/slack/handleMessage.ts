@@ -48,10 +48,10 @@ export const handleSlackMessage: SlackMessageCallback = async(
       isEnterpriseInstall: false,
       teamId:              teamId ?? "",
     });
-    const uuid = `<@${installation.bot?.userId ?? process.env.BOT_USER_ID ?? ""}>`;
+    const uuid = `<@${installation.bot?.userId || process.env.BOT_USER_ID || ""}>`;
     await logger(
       iris,
-      `Received message event in ${teamId ?? "unknown team"}, checking for mention of \`${installation.bot?.userId ?? process.env.BOT_USER_ID ?? ""}\``,
+      `Received message event in ${teamId ?? "unknown team"}, checking for mention of \`${installation.bot?.userId || process.env.BOT_USER_ID || ""}\``,
     );
     if (message.text === undefined) {
       return;

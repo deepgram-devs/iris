@@ -34,6 +34,7 @@ export const processSlackDmMessage = async(
   try {
     await logger(iris, `Processing Slack DM: ${JSON.stringify(message)}`);
     if (teamId === undefined) {
+      // We have to use `say` here because we cannot find a token without a team ID.
       await say("I could not find your workspace ID. Please try again.");
       return;
     }
@@ -44,10 +45,11 @@ export const processSlackDmMessage = async(
     });
     const apiKey = await getSlackApiKey(iris, teamId);
     if (apiKey === null) {
-      await say({
+      await iris.slack.client.chat.postMessage({
+        channel: message.channel,
         // eslint-disable-next-line stylistic/max-len -- Long string.
-        text:  "I could not determine how to authenticate this request. Please try again.",
-        token: botToken,
+        text:    "I could not determine how to authenticate this request. Please try again.",
+        token:   botToken,
       });
       return;
     }
@@ -62,8 +64,9 @@ export const processSlackDmMessage = async(
       apiKey,
       botToken,
     );
-    await say({
+    await iris.slack.client.chat.postMessage({
       blocks:    generateFeedbackBlocks(response),
+      channel:   message.channel,
       text:      response,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
       thread_ts: message.ts,
@@ -80,7 +83,7 @@ export const processSlackDmMessage = async(
         teamId:         teamId,
       },
       {
-        say,
+        manuallySend: true,
       },
     );
   }

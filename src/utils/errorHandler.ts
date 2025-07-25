@@ -39,6 +39,7 @@ import type {
  * @param functions.msgReply - The reply method of a Discord message object.
  * @param functions.interactionReply - The reply method of a Discord interaction object.
  * @param functions.editReply - The edit reply method of a Discord interaction object.
+ * @param functions.manuallySend - Whether to manually send a message to the Slack channel.
  */
 // eslint-disable-next-line max-statements -- This function is expected to be long.
 export const errorHandler = async(
@@ -51,6 +52,7 @@ export const errorHandler = async(
     teamId?:         string | undefined;
   },
   functions: {
+    manuallySend?:     boolean;
     respond?:          RespondFn;
     say?:              SayFn;
     msgReply?:         Message["reply"];
@@ -65,6 +67,20 @@ export const errorHandler = async(
   if (data.error instanceof Error) {
     await logger(iris, `Error message: ${data.error.message}`);
     await logger(iris, `Error stack: ${data.error.stack ?? "No stack trace"}`);
+  }
+  if (functions.manuallySend === true) {
+    const botToken = data.teamId === undefined
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- We know this exists, we would never get here otherwise.
+      ? process.env.SLACK_BOT_TOKEN as string
+      : await getWorkspaceBotToken(iris, data.teamId);
+
+    await iris.slack.client.chat.postMessage({
+      channel: data.slackChannelId ?? "general",
+      text:    `⚠️ Whoops! Something went wrong! Please notify Naomi and share this Error ID: ${id}`,
+      token:   botToken,
+      // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+      ...data.slackThreadTs !== undefined && { thread_ts: data.slackThreadTs },
+    });
   }
   if (functions.respond) {
     const botToken = data.teamId === undefined
@@ -87,8 +103,13 @@ export const errorHandler = async(
     return;
   }
   if (functions.say) {
+    const botToken = data.teamId === undefined
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- We know this exists, we would never get here otherwise.
+      ? process.env.SLACK_BOT_TOKEN as string
+      : await getWorkspaceBotToken(iris, data.teamId);
     const sayArguments: SayArguments = {
-      text: `⚠️ Whoops! Something went wrong! Please notify Naomi and share this Error ID: ${id}`,
+      text:  `⚠️ Whoops! Something went wrong! Please notify Naomi and share this Error ID: ${id}`,
+      token: botToken,
     };
     if (data.slackChannelId !== undefined) {
       sayArguments.channel = data.slackChannelId;
