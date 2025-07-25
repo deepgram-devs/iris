@@ -19,7 +19,8 @@ type SlackActionCallback = (
   iris: Iris,
   ack: AckFn<void> | AckFn<string | SayArguments> | AckFn<DialogValidation>,
   body: SlackAction,
-  respond: RespondFn
+  respond: RespondFn,
+  teamId?: string
 )=> Promise<void>;
 
 type SlackMessageCallback = (

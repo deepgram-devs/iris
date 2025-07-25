@@ -41,7 +41,6 @@ import type {
  * @param functions.editReply - The edit reply method of a Discord interaction object.
  * @param functions.manuallySend - Whether to manually send a message to the Slack channel.
  */
-// eslint-disable-next-line max-statements -- This function is expected to be long.
 export const errorHandler = async(
   iris: Iris,
   data: {

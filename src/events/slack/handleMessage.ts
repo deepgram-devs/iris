@@ -25,7 +25,6 @@ import type { SlackMessageCallback }
  * @param say - The function to send a message back to the user.
  * @param teamId - The ID of the Slack team (workspace) the message is from.
  */
-// eslint-disable-next-line max-statements -- This function is long, but it handles multiple cases.
 export const handleSlackMessage: SlackMessageCallback = async(
   iris,
   message,

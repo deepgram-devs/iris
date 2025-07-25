@@ -16,28 +16,42 @@ import type { SlackActionCallback }
  * @param ack - The function to acknowledge the request.
  * @param body - The action payload from Slack.
  * @param respond - The function to send a message back to the user.
+ * @param teamId - The ID of the Slack team (workspace).
  */
 export const handleNegativeFeedback: SlackActionCallback
-= async(iris, ack, body, respond) => {
+= async(iris, ack, body, respond, teamId) => {
   await ack();
   try {
     if (!("message" in body)) {
       return;
     }
-    await processSlackFeedback(iris, body, respond, "negative");
+    await processSlackFeedback(iris, body, respond, "negative", teamId);
   } catch (error) {
     await errorHandler(
       iris,
-      {
-        error:   error,
-        message: "Error in handleNegativeFeedback",
-        slackThreadTs:
+      body.channel?.id === undefined
+        ? {
+          error:   error,
+          message: "Error in handleNegativeFeedback",
+          slackThreadTs:
               "message" in body
-                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions, stylistic/max-len -- Fuck off.
-                ? body.message.thread_ts as string | undefined ?? body.message.ts
+                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- Too lazy to typeguard.
+                ? (body.message.thread_ts as string | undefined)
+                  ?? body.message.ts
                 : undefined,
-      },
-      { respond },
+        }
+        : {
+          error:          error,
+          message:        "Error in handleNegativeFeedback",
+          slackChannelId: body.channel.id,
+          slackThreadTs:
+              "message" in body
+                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- Fuck off.
+                ? (body.message.thread_ts as string | undefined)
+                  ?? body.message.ts
+                : undefined,
+        },
+      { manuallySend: true },
     );
   }
 };
