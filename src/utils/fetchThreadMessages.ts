@@ -14,6 +14,7 @@ import type { MessageElement }
  * @param iris - The Iris instance.
  * @param channelId - The ID of the Slack channel where the thread is.
  * @param threadTs - The timestamp of the thread to fetch messages from.
+ * @param token - The Slack API token to use for the request.
  * @returns An array of messages in the thread.
  */
 const fetchSlackThreadMessages = async(
@@ -25,8 +26,8 @@ const fetchSlackThreadMessages = async(
   try {
     const result = await iris.slack.client.conversations.replies({
       channel: channelId,
+      token:   token,
       ts:      threadTs,
-      token : token,
     });
 
     if (!result.ok) {

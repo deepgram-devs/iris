@@ -20,7 +20,7 @@ const getSlackApiKey = async(
   iris: Iris,
   teamId: string,
 ): Promise<string | null> => {
-  // eslint-disable @typescript-eslint/consistent-type-assertions -- We know this exists, we would never get here otherwise.
+  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- We know this exists, we would never get here otherwise.
   return process.env.GNOSIS_TOKEN as string;
   /* eslint-disable no-unreachable -- temporarily turned off. */
   // @ts-expect-error -- temporarily turned off.

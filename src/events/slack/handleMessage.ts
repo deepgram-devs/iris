@@ -10,6 +10,7 @@ import { processSlackMentionMessage }
 import { processSlackThreadMessage }
   from "../../modules/slack/processThreadMessage.js";
 import { errorHandler } from "../../utils/errorHandler.js";
+import { getWorkspaceBotUser } from "../../utils/getWorkspaceBotUser.js";
 import { logger } from "../../utils/logger.js";
 import { isSlackMessageInThread } from "../../utils/typeguards.js";
 import type { SlackMessageCallback }
@@ -48,10 +49,10 @@ export const handleSlackMessage: SlackMessageCallback = async(
       isEnterpriseInstall: false,
       teamId:              teamId ?? "",
     });
-    const uuid = `<@${installation.bot?.userId || process.env.BOT_USER_ID || ""}>`;
+    const uuid = `<@${getWorkspaceBotUser(installation)}>`;
     await logger(
       iris,
-      `Received message event in ${teamId ?? "unknown team"}, checking for mention of \`${installation.bot?.userId || process.env.BOT_USER_ID || ""}\``,
+      `Received message event in ${teamId ?? "unknown team"}, checking for mention of \`${getWorkspaceBotUser(installation)}\``,
     );
     if (message.text === undefined) {
       return;
