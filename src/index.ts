@@ -88,6 +88,25 @@ const iris: Iris = {
                 token:  json.authed_user?.access_token ?? "",
               },
             });
+
+            /*
+             * TODO: Store the Deepgram integration data
+             * This requires adding the following columns to the slack_installs table:
+             * - deepgram_project_id
+             * - deepgram_api_key
+             * - deepgram_api_key_expiration
+             * Or creating a separate deepgram_integrations table linked to slack installations
+             */
+            if (json.deepgram) {
+              void logger(iris, `Received Deepgram integration data for project: ${json.deepgram.project_id}`);
+
+              /*
+               * Once the database schema is updated, store the Deepgram data here
+               * For now, we'll just log it
+               */
+              void logger(iris, "Deepgram integration data received but not stored - database schema update required");
+            }
+
             // eslint-disable-next-line @typescript-eslint/naming-convention -- It's a server response.
             response.writeHead(200, { "Content-Type": "text/plain" });
             response.end("Installation stored successfully!");

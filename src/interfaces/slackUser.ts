@@ -26,4 +26,9 @@ export interface SlackUser {
     access_token: string;
     token_type:   string;
   };
+  deepgram?: {
+    project_id:         string;
+    api_key:            string;
+    api_key_expiration: string;
+  };
 }
