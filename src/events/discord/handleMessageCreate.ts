@@ -7,7 +7,7 @@
 import { appendFeedbackButtons }
   from "../../modules/discord/appendFeedbackButtons.js";
 import { errorHandler } from "../../utils/errorHandler.js";
-import { getDiscordApiKey } from "../../utils/getApiKey.js";
+import { getDiscordAuthHeaders } from "../../utils/getApiKey.js";
 import { makeAiRequestOnDiscord } from "../../utils/makeAiRequest.js";
 import type { Iris } from "../../interfaces/iris.js";
 import type { Message } from "discord.js";
@@ -18,7 +18,7 @@ import type { Message } from "discord.js";
  * @param iris - Iris's instance.
  * @param message - The message payload from Discord.
  */
-export const handleMessageCreate = async(
+export const handleMessageCreate = async (
   iris: Iris,
   message: Message,
 ): Promise<void> => {
@@ -30,8 +30,10 @@ export const handleMessageCreate = async(
       await message.reply("Sorry, but DMs are not supported at this time.");
       return;
     }
-    const apiKey = await getDiscordApiKey(iris, message.guild.id);
-    if (apiKey === null) {
+    let authHeaders: Headers = new Headers();
+    try {
+      authHeaders = await getDiscordAuthHeaders(iris, message.guild.id);
+    } catch {
       await message.reply(
         // eslint-disable-next-line stylistic/max-len -- Long string.
         "Sorry, but I could not determine how to authenticate this request. Please try again.",
@@ -41,14 +43,14 @@ export const handleMessageCreate = async(
     if (!message.channel.isThread()) {
       const result = await makeAiRequestOnDiscord(
         iris,
-        [ message ],
+        [message],
         message.channel.name,
         message.author.displayName,
-        apiKey,
+        authHeaders,
       );
       const thread = await message.startThread({
         autoArchiveDuration: 60,
-        name:                `Thread for ${message.author.username}`,
+        name: `Thread for ${message.author.username}`,
       });
       await thread.send(appendFeedbackButtons(result));
       return;
@@ -58,10 +60,10 @@ export const handleMessageCreate = async(
     });
     const result = await makeAiRequestOnDiscord(
       iris,
-      [ ...previousMessages.values() ],
+      Array.from(previousMessages.values()),
       message.channel.name,
       message.author.displayName,
-      apiKey,
+      authHeaders,
     );
     await message.reply(appendFeedbackButtons(result));
   } catch (error) {

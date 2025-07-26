@@ -83,6 +83,60 @@ const getSlackAuthHeaders = async (
 };
 
 /**
+ * Fetches the authentication headers for Gnosis API for Discord servers.
+ * @param iris - Iris's instance.
+ * @param serverId - The ID of the Discord server.
+ * @returns The authentication headers for Gnosis API.
+ */
+const getDiscordAuthHeaders = async (
+  iris: Iris,
+  serverId: string,
+): Promise<Headers> => {
+  const headers = new Headers();
+  headers.set("Content-Type", "application/json");
+
+  try {
+
+    /*
+     * TODO: Once Discord installations are stored with Deepgram data,
+     * we'll fetch the installation and check for deepgram?.api_key
+     * For now, we'll add a placeholder
+     */
+    /**
+     * This will be installation.deepgram?.api_key.
+     */
+    const deepgramApiKey: string | null = null;
+
+    if (deepgramApiKey !== null) {
+      await logger(iris, "Using Deepgram API key from Discord OAuth integration");
+      headers.set("Authorization", `Bearer ${deepgramApiKey}`);
+      return headers;
+    }
+
+    // Fallback to environment variable
+    if (process.env.DEEPGRAM_API_KEY) {
+      await logger(iris, "Using fallback DEEPGRAM_API_KEY from environment for Discord");
+      headers.set("Authorization", `Bearer ${process.env.DEEPGRAM_API_KEY}`);
+      return headers;
+    }
+
+    // If no auth method is available, throw error
+    throw new Error("No authentication method available for Gnosis API");
+  } catch (error) {
+    await logger(
+      iris,
+      `Error getting auth headers for Discord server ${serverId}: ${String(error)}`,
+    );
+    // Return headers with fallback if available
+    if (process.env.DEEPGRAM_API_KEY) {
+      headers.set("Authorization", `Bearer ${process.env.DEEPGRAM_API_KEY}`);
+      return headers;
+    }
+    throw error;
+  }
+};
+
+/**
  * Fetches the API key for a Slack workspace based on the team ID.
  * @param iris - Iris's instance.
  * @param teamId - The ID of the Slack workspace.
@@ -154,4 +208,4 @@ const getDiscordApiKey = async (
   return projectId;
 };
 
-export { getSlackApiKey, getDiscordApiKey, getSlackAuthHeaders };
+export { getSlackApiKey, getDiscordApiKey, getSlackAuthHeaders, getDiscordAuthHeaders };
