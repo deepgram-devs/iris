@@ -10,12 +10,7 @@ export default [
           allowedLicenses: ["MIT"],
         },
       ],
-      "@typescript-eslint/max-params": [
-        "error",
-        {
-          max: 5,
-        },
-      ],
+      "@typescript-eslint/max-params": "off",
       "max-lines-per-function": "off",
       "complexity": "off",
       "max-statements": "off",

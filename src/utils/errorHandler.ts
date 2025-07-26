@@ -28,6 +28,7 @@ import type {
  * Logs the error to our logging channels.
  * @param iris - Iris's instance.
  * @param data - Metadata.
+ * @param data.enterpriseId - The ID of the Slack enterprise (if applicable).
  * @param data.error - The error object.
  * @param data.message - A description of where the error occurred.
  * @param data.slackChannelId - The Slack channel ID to respond in.
@@ -49,6 +50,7 @@ export const errorHandler = async(
     slackChannelId?: string;
     slackThreadTs?:  string | undefined;
     teamId?:         string | undefined;
+    enterpriseId?:   string | undefined;
   },
   functions: {
     manuallySend?:     boolean;
@@ -71,7 +73,7 @@ export const errorHandler = async(
     const botToken = data.teamId === undefined
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- We know this exists, we would never get here otherwise.
       ? process.env.SLACK_BOT_TOKEN as string
-      : await getWorkspaceBotToken(iris, data.teamId);
+      : await getWorkspaceBotToken(iris, data.teamId, data.enterpriseId);
 
     await iris.slack.client.chat.postMessage({
       channel: data.slackChannelId ?? "general",
@@ -85,7 +87,7 @@ export const errorHandler = async(
     const botToken = data.teamId === undefined
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- We know this exists, we would never get here otherwise.
       ? process.env.SLACK_BOT_TOKEN as string
-      : await getWorkspaceBotToken(iris, data.teamId);
+      : await getWorkspaceBotToken(iris, data.teamId, data.enterpriseId);
 
     const responseArguments: RespondArguments = {
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
@@ -105,7 +107,7 @@ export const errorHandler = async(
     const botToken = data.teamId === undefined
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- We know this exists, we would never get here otherwise.
       ? process.env.SLACK_BOT_TOKEN as string
-      : await getWorkspaceBotToken(iris, data.teamId);
+      : await getWorkspaceBotToken(iris, data.teamId, data.enterpriseId);
     const sayArguments: SayArguments = {
       text:  `⚠️ Whoops! Something went wrong! Please notify Naomi and share this Error ID: ${id}`,
       token: botToken,

@@ -24,26 +24,28 @@ import type {
  * @param message - The message payload from Slack.
  * @param say - The function to send a message back to the user.
  * @param teamId - The ID of the Slack team (workspace) the message is from.
+ * @param enterpriseId - The ID of the Slack enterprise (if applicable).
  */
 export const processSlackDmMessage = async(
   iris: Iris,
   message: GenericMessageEvent | FileShareMessageEvent,
   say: SayFn,
-  teamId?: string,
+  teamId: string | undefined,
+  enterpriseId: string | undefined,
 ): Promise<void> => {
   try {
     await logger(iris, `Processing Slack DM: ${JSON.stringify(message)}`);
-    if (teamId === undefined) {
+    if (teamId === undefined && enterpriseId === undefined) {
       // We have to use `say` here because we cannot find a token without a team ID.
       await say("I could not find your workspace ID. Please try again.");
       return;
     }
-    const botToken = await getWorkspaceBotToken(iris, teamId);
+    const botToken = await getWorkspaceBotToken(iris, teamId, enterpriseId);
     const { user } = await iris.slack.client.users.info({
       token: botToken,
       user:  message.user,
     });
-    const apiKey = await getSlackApiKey(iris, teamId);
+    const apiKey = await getSlackApiKey(iris, teamId, enterpriseId);
     if (apiKey === null) {
       await iris.slack.client.chat.postMessage({
         channel: message.channel,

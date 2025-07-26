@@ -17,6 +17,7 @@ import type { SlackActionCallback }
  * @param body - The action payload from Slack.
  * @param respond - The function to send a message back to the user.
  * @param teamId - The ID of the Slack team (workspace).
+ * @param enterpriseId - The ID of the Slack enterprise (if applicable).
  */
 export const handlePositiveFeedback: SlackActionCallback = async(
   iris,
@@ -24,13 +25,21 @@ export const handlePositiveFeedback: SlackActionCallback = async(
   body,
   respond,
   teamId,
+  enterpriseId,
 ) => {
   await ack();
   try {
     if (!("message" in body)) {
       return;
     }
-    await processSlackFeedback(iris, body, respond, "positive", teamId);
+    await processSlackFeedback(
+      iris,
+      body,
+      respond,
+      "positive",
+      teamId,
+      enterpriseId,
+    );
   } catch (error) {
     await errorHandler(
       iris,
@@ -40,7 +49,7 @@ export const handlePositiveFeedback: SlackActionCallback = async(
           message: "Error in handlePositiveFeedback",
           slackThreadTs:
               "message" in body
-                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- Too lazy to typeguard.
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- Too lazy to typeguard.
                 ? (body.message.thread_ts as string | undefined)
                   ?? body.message.ts
                 : undefined,
@@ -51,7 +60,7 @@ export const handlePositiveFeedback: SlackActionCallback = async(
           slackChannelId: body.channel.id,
           slackThreadTs:
               "message" in body
-                // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- Fuck off.
+              // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- Fuck off.
                 ? (body.message.thread_ts as string | undefined)
                   ?? body.message.ts
                 : undefined,

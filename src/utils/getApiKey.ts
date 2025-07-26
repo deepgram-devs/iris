@@ -14,29 +14,37 @@ import type { Iris } from "../interfaces/iris.js";
  * Fetches the API key for a Slack workspace based on the team ID.
  * @param iris - Iris's instance.
  * @param teamId - The ID of the Slack workspace.
+ * @param enterpriseId - The ID of the Slack enterprise (if applicable).
  * @returns The API key for the Slack workspace, or null if not found.
  */
 const getSlackApiKey = async(
   iris: Iris,
-  teamId: string,
+  teamId: string | undefined,
+  enterpriseId: string | undefined,
 ): Promise<string | null> => {
   // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- We know this exists, we would never get here otherwise.
   return process.env.GNOSIS_TOKEN as string;
   /* eslint-disable no-unreachable -- temporarily turned off. */
   // @ts-expect-error -- temporarily turned off.
-  if (preauthedSlackWorkspaceIds.includes(teamId)) {
+  if (
+    // @ts-expect-error -- temporarily turned off.
+    preauthedSlackWorkspaceIds.includes(teamId)
+    // @ts-expect-error -- temporarily turned off.
+    || preauthedSlackWorkspaceIds.includes(enterpriseId)
+  ) {
     return process.env.GNOSIS_TOKEN ?? null;
   }
   const record = await iris.db.
     from("profiles").
     select("dg_project_id").
+    // @ts-expect-error -- temporarily turned off.
     eq("slack_workspace_id", teamId).
     single();
   if (record.error) {
     await logger(
       iris,
       // @ts-expect-error -- Early return breaks this.
-      `Error fetching project ID for Slack workspace ${teamId}: ${record.error.message}`,
+      `Error fetching project ID for Slack workspace ${teamId ?? enterpriseId ?? "unknown workspace"}: ${record.error.message}`,
     );
     return null;
   }

@@ -19,13 +19,15 @@ import type { ButtonInteraction } from "discord.js";
  * @param respond - The function to send a message back to the user.
  * @param feedbackType - Whether the feedback is "positive" or "negative".
  * @param teamId - The ID of the Slack team (workspace).
+ * @param enterpriseId - The ID of the Slack enterprise (if applicable).
  */
 const processSlackFeedback = async(
   iris: Iris,
   body: BlockAction,
   respond: RespondFn,
   feedbackType: "positive" | "negative",
-  teamId?: string,
+  teamId: string | undefined,
+  enterpriseId: string | undefined,
 ): Promise<void> => {
   const { message, channel, user: userObject } = body;
   await logger(
@@ -47,7 +49,7 @@ const processSlackFeedback = async(
     });
     return;
   }
-  const botToken = await getWorkspaceBotToken(iris, teamId);
+  const botToken = await getWorkspaceBotToken(iris, teamId, enterpriseId);
   if (!message) {
     await iris.slack.client.chat.postEphemeral({
       channel: channel?.id ?? "Unknown",
