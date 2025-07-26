@@ -20,6 +20,7 @@
     "@nhcarrigan/typescript-config": "4.0.0",
     "@vitest/coverage-istanbul": "3.1.4",
     "eslint": "9.27.0",
+    "supabase": "2.31.4",
     "tsx": "4.19.4",
     "typescript": "5.8.3",
     "vitest": "3.1.4"
@@ -27,6 +28,7 @@
   "dependencies": {
     "@slack/bolt": "4.4.0",
     "@slack/web-api": "7.9.2",
+    "@supabase/supabase-js": "2.50.2",
     "discord.js": "14.19.3",
     "short-unique-id": "5.3.2"
   }

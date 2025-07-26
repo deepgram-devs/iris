@@ -6,6 +6,8 @@
 
 import { errorHandler } from "../../utils/errorHandler.js";
 import { fetchSlackThreadMessages } from "../../utils/fetchThreadMessages.js";
+import { getSlackApiKey } from "../../utils/getApiKey.js";
+import { getWorkspaceBotToken } from "../../utils/getWorkspaceBotToken.js";
 import { logger } from "../../utils/logger.js";
 import { makeAiRequestOnSlack } from "../../utils/makeAiRequest.js";
 import {
@@ -25,6 +27,8 @@ import type {
  * @param iris - Iris's instance.
  * @param message - The message payload from Slack.
  * @param say - The function to send a message back to the user.
+ * @param teamId - The ID of the Slack team (workspace) the message is from.
+ * @param enterpriseId - The ID of the Slack enterprise (if applicable).
  */
 export const processSlackThreadMessage = async(
   iris: Iris,
@@ -33,22 +37,46 @@ export const processSlackThreadMessage = async(
     thread_ts: string;
   },
   say: SayFn,
+  teamId: string | undefined,
+  enterpriseId: string | undefined,
 ): Promise<void> => {
   try {
-    await logger(iris, `Processing Slack Thread Mention: ${JSON.stringify(message)}`);
+    await logger(
+      iris,
+      `Processing Slack Thread Mention: ${JSON.stringify(message)}`,
+    );
+    if (teamId === undefined) {
+      // We have to use `say` here because we cannot find a token without a team ID.
+      await say("I could not find your workspace ID. Please try again.");
+      return;
+    }
+    const botToken = await getWorkspaceBotToken(iris, teamId, enterpriseId);
     const { user } = await iris.slack.client.users.info({
-      user: message.user,
+      token: botToken,
+      user:  message.user,
     });
+    const apiKey = await getSlackApiKey(iris, teamId, enterpriseId);
+    if (apiKey === null) {
+      await iris.slack.client.chat.postMessage({
+        channel: message.channel,
+        // eslint-disable-next-line stylistic/max-len -- Long string.
+        text:    "I could not determine how to authenticate this request. Please try again.",
+        token:   botToken,
+      });
+      return;
+    }
     const username
       = user?.profile?.display_name ?? user?.real_name ?? "Unknown User";
     const { channel } = await iris.slack.client.conversations.info({
       channel: message.channel,
+      token:   botToken,
     });
     const channelName = channel?.name ?? "Unknown Public Thread";
     const previousReplies = await fetchSlackThreadMessages(
       iris,
       message.channel,
       message.thread_ts,
+      botToken,
     );
     const previousMessages = previousReplies.filter((messageToMap) => {
       return messageToMap.ts !== message.ts;
@@ -66,13 +94,16 @@ export const processSlackThreadMessage = async(
       [ ...parsedPreviousMessages, trimSlackMessageFromEvent(message) ],
       channelName,
       username,
+      apiKey,
+      botToken,
     );
-    await say({
+    await iris.slack.client.chat.postMessage({
       blocks:    generateFeedbackBlocks(response),
       channel:   message.channel,
       text:      response,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
       thread_ts: message.ts,
+      token:     botToken,
     });
   } catch (error) {
     await errorHandler(
@@ -82,9 +113,10 @@ export const processSlackThreadMessage = async(
         message:        "Error in processSlackThreadMessage",
         slackChannelId: message.channel,
         slackThreadTs:  message.ts,
+        teamId:         teamId,
       },
       {
-        say,
+        manuallySend: true,
       },
     );
   }

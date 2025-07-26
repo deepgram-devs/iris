@@ -15,16 +15,51 @@ import type { Iris } from "../interfaces/iris.js";
  * @param iris - Iris's instance.
  */
 export const mountSlackEvents = (iris: Iris): void => {
-  iris.slack.action("feedback-positive", async({ ack, body, respond }) => {
-    await handlePositiveFeedback(iris, ack, body, respond);
-  });
-  iris.slack.action("feedback-negative", async({ ack, body, respond }) => {
-    await handleNegativeFeedback(iris, ack, body, respond);
-  });
-  iris.slack.action("forward-feedback", async({ ack, body, respond }) => {
-    await handleForwardFeedback(iris, ack, body, respond);
-  });
-  iris.slack.message(async({ message, say }) => {
-    await handleSlackMessage(iris, message, say);
+  iris.slack.action(
+    "feedback-positive",
+    async({ ack, body, respond, context }) => {
+      const { teamId, enterpriseId } = context;
+      await handlePositiveFeedback(
+        iris,
+        ack,
+        body,
+        respond,
+        teamId,
+        enterpriseId,
+      );
+    },
+  );
+  iris.slack.action(
+    "feedback-negative",
+    async({ ack, body, respond, context }) => {
+      const { teamId, enterpriseId } = context;
+      await handleNegativeFeedback(
+        iris,
+        ack,
+        body,
+        respond,
+        teamId,
+        enterpriseId,
+      );
+    },
+  );
+  iris.slack.action(
+    "forward-feedback",
+    async({ ack, body, respond, context }) => {
+      const { teamId, enterpriseId } = context;
+      await handleForwardFeedback(
+        iris,
+        ack,
+        body,
+        respond,
+        teamId,
+        enterpriseId,
+      );
+    },
+  );
+  iris.slack.message(async({ message, say, context }) => {
+    // The workspace (team) id is available as `team`
+    const { teamId, enterpriseId } = context;
+    await handleSlackMessage(iris, message, say, teamId, enterpriseId);
   });
 };

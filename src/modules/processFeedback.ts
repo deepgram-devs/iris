@@ -4,6 +4,8 @@
  * @author Naomi Carrigan
  */
 
+import { getUserPreferredName } from "../utils/getUserPreferredName.js";
+import { getWorkspaceBotToken } from "../utils/getWorkspaceBotToken.js";
 import { logger } from "../utils/logger.js";
 import type { Iris } from "../interfaces/iris.js";
 import type { RespondFn, BlockAction } from "@slack/bolt";
@@ -16,12 +18,16 @@ import type { ButtonInteraction } from "discord.js";
  * @param body - The action payload from Slack.
  * @param respond - The function to send a message back to the user.
  * @param feedbackType - Whether the feedback is "positive" or "negative".
+ * @param teamId - The ID of the Slack team (workspace).
+ * @param enterpriseId - The ID of the Slack enterprise (if applicable).
  */
 const processSlackFeedback = async(
   iris: Iris,
   body: BlockAction,
   respond: RespondFn,
   feedbackType: "positive" | "negative",
+  teamId: string | undefined,
+  enterpriseId: string | undefined,
 ): Promise<void> => {
   const { message, channel, user: userObject } = body;
   await logger(
@@ -32,37 +38,45 @@ const processSlackFeedback = async(
       String(message?.thread_ts ?? `${message?.ts ?? "what no ts"} but not in thread`)
     } - sending to ${process.env.FEEDBACK_CHANNEL ?? "no feedback channel"}`,
   );
-  if (!message) {
+  if (teamId === undefined) {
+    // We have to use `respond` here because we cannot find a token without a team ID.
     await respond({
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
       replace_original: false,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
       response_type:    "ephemeral",
-      text:             "No message found in the feedback payload.",
+      text:             "I could not find your workspace ID. Please try again.",
     });
     return;
   }
+  const botToken = await getWorkspaceBotToken(iris, teamId, enterpriseId);
+  if (!message) {
+    await iris.slack.client.chat.postEphemeral({
+      channel: channel?.id ?? "Unknown",
+      text:    "No message found in the feedback payload.",
+      token:   botToken,
+      user:    userObject.id,
+    });
+    return;
+  }
+  const threadTs
+        = typeof message.thread_ts === "string"
+          ? message.thread_ts
+          : message.ts;
   const userInfo = await iris.slack.client.users.info({
-    user: userObject.id,
+    token: botToken,
+    user:  userObject.id,
   });
-  const user
-    = userInfo.user?.profile?.display_name
-    ?? userInfo.user?.real_name
-    ?? userInfo.user?.name
-    ?? userObject.username;
+  const userName = getUserPreferredName(userInfo, userObject);
   const channelId = process.env.FEEDBACK_CHANNEL;
   if (channelId === undefined) {
-    await respond({
+    await iris.slack.client.chat.postEphemeral({
+      channel:   channel?.id ?? "Unknown",
+      text:      "Feedback channel not set in environment variables.",
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-      replace_original: false,
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-      response_type:    "ephemeral",
-      text:             "Feedback channel not set in environment variables.",
-      // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-      thread_ts:
-        typeof message.thread_ts === "string"
-          ? message.thread_ts
-          : message.ts,
+      thread_ts: threadTs,
+      token:     botToken,
+      user:      userObject.id,
     });
     return;
   }
@@ -73,9 +87,8 @@ const processSlackFeedback = async(
     inclusive: false,
     latest:    message.ts,
     limit:     1,
-    ts:        typeof message.thread_ts === "string"
-      ? message.thread_ts
-      : message.ts,
+    token:     botToken,
+    ts:        threadTs,
   });
   const previousMessage = previousMessageRequest.messages?.reverse()[0];
   const blocks = [
@@ -91,7 +104,7 @@ const processSlackFeedback = async(
     {
       elements: [
         {
-          text: `Feedback from ${user}:`,
+          text: `Feedback from ${userName}:`,
           type: "mrkdwn",
         },
       ],
@@ -117,17 +130,13 @@ const processSlackFeedback = async(
     channel: channelId,
     text:    "Feedback received!",
   });
-  await respond({
+  await iris.slack.client.chat.postEphemeral({
+    channel:   channel?.id ?? "Unknown",
+    text:      `Thank you for your feedback, ${userName}! You selected: ${feedbackType}`,
     // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-    replace_original: false,
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-    response_type:    "ephemeral",
-    text:             `Thank you for your feedback, ${user}! You selected: ${feedbackType}`,
-    // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
-    thread_ts:
-      typeof message.thread_ts === "string"
-        ? message.thread_ts
-        : message.ts,
+    thread_ts: threadTs,
+    token:     botToken,
+    user:      userObject.id,
   });
 };
 
