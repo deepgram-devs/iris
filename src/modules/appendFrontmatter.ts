@@ -26,7 +26,7 @@ const appendSlackFrontmatter = (
   if (message.ts === undefined || message.userId === undefined) {
     return message.text;
   }
-  const [ seconds, milliseconds ] = message.ts.split(".");
+  const [seconds, milliseconds] = message.ts.split(".");
   const secondsToTimestamp = Number.parseInt(seconds ?? "0", 10) * 1000;
   const millisecondsToTimestamp = Math.floor(
     Number.parseInt(milliseconds ?? "0", 10) / 1000,
@@ -42,6 +42,8 @@ channel: ${channelName}
 mentions: ${mentionsIris
   ? "yes"
   : "no"}
+fmt: slack
+map: "*bold* _italic_ ~strike~ \`code\` \`\`\`block\`\`\` >quote • bullets 1. nums <url|text>"
 ---
 
 ${message.text}`;
@@ -74,6 +76,8 @@ channel: ${channelName}
 mentions: ${mentionsIris
   ? "yes"
   : "no"}
+fmt: discord
+map: "**bold** *italic* __underline__ ~~strike~~ \`code\` \`\`\`js\\ncode\`\`\` > quote - bullets 1. nums (avoid blank lines)"
 ---
 
 ${message.content}`;
