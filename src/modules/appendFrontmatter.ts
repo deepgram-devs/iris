@@ -26,7 +26,7 @@ const appendSlackFrontmatter = (
   if (message.ts === undefined || message.userId === undefined) {
     return message.text;
   }
-  const [seconds, milliseconds] = message.ts.split(".");
+  const [ seconds, milliseconds ] = message.ts.split(".");
   const secondsToTimestamp = Number.parseInt(seconds ?? "0", 10) * 1000;
   const millisecondsToTimestamp = Math.floor(
     Number.parseInt(milliseconds ?? "0", 10) / 1000,
