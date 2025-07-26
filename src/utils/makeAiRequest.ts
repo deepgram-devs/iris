@@ -15,25 +15,22 @@ import type { Iris } from "../interfaces/iris.js";
 import type { MinimalSlackMessage } from "../interfaces/minimalSlackMessage.js";
 import type { Message } from "discord.js";
 
-const makeAiRequest = async(
+const makeAiRequest = async (
   iris: Iris,
   messages: Array<{ role: string; content: string }>,
-  apiKey: string,
+  headers: Headers,
 ): Promise<string> => {
   try {
     const request = await fetch(
-      "https://gnosis.deepgram.com/v1/chat/completions",
+      "https://gnosis-staging.fly.dev/v1/chat/completions",
       {
         body: JSON.stringify({
-          messages:        messages,
-          model:           "gpt-4o",
+          messages: messages,
+          model: "gpt-4o",
           response_format: { type: "text" },
-          temperature:     1,
+          temperature: 1,
         }),
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type":  "application/json",
-        },
+        headers: headers,
         method: "POST",
       },
     );
@@ -78,16 +75,16 @@ const makeAiRequest = async(
  * @param messages - The slack messages to include as the conversation.
  * @param channelName - The name of the channel the conversation occurred in.
  * @param username - The user whose message triggered an AI request.
- * @param apiKey - The Deepgram API key to authenticate the request with.
+ * @param headers - The authentication headers for the Gnosis API.
  * @param token - The Slack bot token to authenticate the request with.
  * @returns The response from Gnosis.
  */
-const makeAiRequestOnSlack = async(
+const makeAiRequestOnSlack = async (
   iris: Iris,
   messages: Array<MinimalSlackMessage>,
   channelName: string,
   username: string,
-  apiKey: string,
+  headers: Headers,
   token: string,
 ): Promise<string> => {
   const irisUser = await iris.slack.client.auth.test({ token });
@@ -101,11 +98,11 @@ const makeAiRequestOnSlack = async(
   const allMessages = [
     {
       content: generatePrompt(username, "slack"),
-      role:    "system",
+      role: "system",
     },
     ...formattedMessages,
   ];
-  const result = await makeAiRequest(iris, allMessages, apiKey);
+  const result = await makeAiRequest(iris, allMessages, headers);
   return result;
 };
 
@@ -119,7 +116,7 @@ const makeAiRequestOnSlack = async(
  * @param apiKey - The Deepgram API key to authenticate the request with.
  * @returns The response from Gnosis.
  */
-const makeAiRequestOnDiscord = async(
+const makeAiRequestOnDiscord = async (
   iris: Iris,
   messages: Array<Message<true>>,
   channelName: string,
@@ -137,11 +134,15 @@ const makeAiRequestOnDiscord = async(
   const allMessages = [
     {
       content: generatePrompt(username, "discord"),
-      role:    "system",
+      role: "system",
     },
     ...formattedMessages,
   ];
-  const result = await makeAiRequest(iris, allMessages, apiKey);
+  // For Discord, we still use the old API key format for now
+  const headers = new Headers();
+  headers.set("Authorization", `Bearer ${apiKey}`);
+  headers.set("Content-Type", "application/json");
+  const result = await makeAiRequest(iris, allMessages, headers);
   return result;
 };
 
