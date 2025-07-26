@@ -4,8 +4,6 @@
  * @author Naomi Carrigan
  */
 /* eslint-disable @typescript-eslint/naming-convention -- There's enough properties in here that cannot be camelCase we may as well turn the rule off entirely.*/
-/* eslint-disable @typescript-eslint/max-params -- Naomi be lazy. */
-
 import { errorHandler } from "./errorHandler.js";
 import {
   formatDiscordMessages,
