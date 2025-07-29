@@ -11,18 +11,21 @@ type Platform = "discord" | "slack";
 
 /**
  * Gets a platform property value or returns a short unsupported marker.
- * @param platform
- * @param property
+ * @param platform - The platform to check (either "discord" or "slack").
+ * @param property - The property to look up.
+ * @returns The value of the property for the platform, or "—" if unsupported.
  */
 const lookup = (platform: Platform, property: string): string => {
   return isPropertyInPlatformSyntaxObject(platform, property)
     ? platformSyntax[platform][property]
-    : "—"; // Em dash for unsupported
+    : "—";
+  // Em dash for unsupported
 };
 
 /**
  * Generates a compact syntax reference block for the platform.
- * @param platform
+ * @param platform - The platform to generate the syntax block for.
+ * @returns A string containing the syntax block.
  */
 const syntaxBlock = (platform: Platform): string => {
   return `${platform.toUpperCase()} message formatting:
