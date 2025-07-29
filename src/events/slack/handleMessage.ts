@@ -37,6 +37,20 @@ export const handleSlackMessage: SlackMessageCallback = async(
     if (message.subtype !== undefined && message.subtype !== "file_share") {
       return;
     }
+    const installation = await iris.store.fetchInstallation({
+      enterpriseId:        undefined,
+      isEnterpriseInstall: false,
+      teamId:              teamId ?? "",
+    });
+    const rawId = getWorkspaceBotUser(installation);
+    const uuid = `<@${rawId}>`;
+    if (message.user === rawId) {
+      await logger(
+        iris,
+        `Ignoring message from bot itself in ${teamId ?? enterpriseId ?? "unknown workspace"}`,
+      );
+      return;
+    }
     if (message.channel_type === "im") {
       if (isSlackMessageInThread(message)) {
         await processSlackThreadMessage(
@@ -51,17 +65,11 @@ export const handleSlackMessage: SlackMessageCallback = async(
       await processSlackDmMessage(iris, message, say, teamId, enterpriseId);
       return;
     }
-    const installation = await iris.store.fetchInstallation({
-      enterpriseId:        undefined,
-      isEnterpriseInstall: false,
-      teamId:              teamId ?? "",
-    });
-    const uuid = `<@${getWorkspaceBotUser(installation)}>`;
     await logger(
       iris,
       `Received message event in ${
         teamId ?? enterpriseId ?? "unknown workspace"
-      }, checking for mention of \`${getWorkspaceBotUser(installation)}\``,
+      }, checking for mention of \`${rawId}\``,
     );
     if (message.text === undefined) {
       return;
