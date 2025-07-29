@@ -104,7 +104,9 @@ const iris: Iris = {
                * Once the database schema is updated, store the Deepgram data here
                * For now, we'll just log it
                */
-              void logger(iris, "Deepgram integration data received but not stored - database schema update required");
+              void logger(iris,
+                // eslint-disable-next-line stylistic/max-len -- Long string.
+                "Deepgram integration data received but not stored - database schema update required");
             }
 
             // eslint-disable-next-line @typescript-eslint/naming-convention -- It's a server response.

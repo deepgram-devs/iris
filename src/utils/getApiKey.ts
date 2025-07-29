@@ -17,7 +17,7 @@ import type { Iris } from "../interfaces/iris.js";
  * @param enterpriseId - The ID of the Slack enterprise (if applicable).
  * @returns The authentication headers for Gnosis API.
  */
-const getSlackAuthHeaders = async (
+const getSlackAuthHeaders = async(
   iris: Iris,
   teamId: string | undefined,
   enterpriseId: string | undefined,
@@ -26,11 +26,14 @@ const getSlackAuthHeaders = async (
   headers.set("Content-Type", "application/json");
 
   try {
-    // First, check if we have OAuth data with Deepgram API key
+    // First, check if we have OAuth data with Deepgram API key.
+
+    // @ts-expect-error - This is unused because we don't have the full implementation yet.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars -- This is unused because we don't have the full implementation yet.
     const installation = await iris.store.fetchInstallation({
-      enterpriseId: enterpriseId,
+      enterpriseId:        enterpriseId,
       isEnterpriseInstall: Boolean(enterpriseId),
-      teamId: teamId ?? "",
+      teamId:              teamId ?? "",
     });
 
     /*
@@ -43,8 +46,10 @@ const getSlackAuthHeaders = async (
      */
     const deepgramApiKey: string | null = null;
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- This will be resolved when we finalise the flow.
     if (deepgramApiKey !== null) {
       await logger(iris, "Using Deepgram API key from OAuth integration");
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- This will not be type never when we finish implementation.
       headers.set("Authorization", `token ${deepgramApiKey}`);
       return headers;
     }
@@ -60,7 +65,8 @@ const getSlackAuthHeaders = async (
      */
 
     // Strategy 3: Fallback to environment variable
-    if (process.env.DEEPGRAM_API_KEY) {
+
+    if (process.env.DEEPGRAM_API_KEY !== undefined) {
       await logger(iris, "Using fallback DEEPGRAM_API_KEY from environment");
       headers.set("Authorization", `token ${process.env.DEEPGRAM_API_KEY}`);
       return headers;
@@ -74,7 +80,7 @@ const getSlackAuthHeaders = async (
       `Error getting auth headers for workspace ${teamId ?? enterpriseId ?? "unknown"}: ${String(error)}`,
     );
     // Return headers with fallback if available
-    if (process.env.DEEPGRAM_API_KEY) {
+    if (process.env.DEEPGRAM_API_KEY !== undefined) {
       headers.set("Authorization", `token ${process.env.DEEPGRAM_API_KEY}`);
       return headers;
     }
@@ -85,37 +91,38 @@ const getSlackAuthHeaders = async (
 /**
  * Fetches the authentication headers for Gnosis API for Discord servers.
  * @param iris - Iris's instance.
- * @param serverId - The ID of the Discord server.
+ * @param serverId - The ID of the Discord server the bot is operating in.
  * @returns The authentication headers for Gnosis API.
  */
-const getDiscordAuthHeaders = async (
+const getDiscordAuthHeaders = async(
   iris: Iris,
   serverId: string,
 ): Promise<Headers> => {
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
 
+  /*
+   * TODO: Once Discord installations are stored with Deepgram data,
+   * we'll fetch the installation and check for deepgram?.api_key
+   * For now, we'll add a placeholder
+   */
   try {
-
-    /*
-     * TODO: Once Discord installations are stored with Deepgram data,
-     * we'll fetch the installation and check for deepgram?.api_key
-     * For now, we'll add a placeholder
-     */
-    /**
-     * This will be installation.deepgram?.api_key.
-     */
+    // This will be installation.deepgram?.api_key.
     const deepgramApiKey: string | null = null;
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- This will be resolved when we finalise the flow.
     if (deepgramApiKey !== null) {
-      await logger(iris, "Using Deepgram API key from Discord OAuth integration");
+      await logger(iris,
+        "Using Deepgram API key from Discord OAuth integration");
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- This will not be type never when we finish implementation.
       headers.set("Authorization", `Bearer ${deepgramApiKey}`);
       return headers;
     }
 
     // Fallback to environment variable
-    if (process.env.DEEPGRAM_API_KEY) {
-      await logger(iris, "Using fallback DEEPGRAM_API_KEY from environment for Discord");
+    if (process.env.DEEPGRAM_API_KEY !== undefined) {
+      await logger(iris,
+        "Using fallback DEEPGRAM_API_KEY from environment for Discord");
       headers.set("Authorization", `Bearer ${process.env.DEEPGRAM_API_KEY}`);
       return headers;
     }
@@ -128,7 +135,7 @@ const getDiscordAuthHeaders = async (
       `Error getting auth headers for Discord server ${serverId}: ${String(error)}`,
     );
     // Return headers with fallback if available
-    if (process.env.DEEPGRAM_API_KEY) {
+    if (process.env.DEEPGRAM_API_KEY !== undefined) {
       headers.set("Authorization", `Bearer ${process.env.DEEPGRAM_API_KEY}`);
       return headers;
     }
@@ -143,7 +150,7 @@ const getDiscordAuthHeaders = async (
  * @param enterpriseId - The ID of the Slack enterprise (if applicable).
  * @returns The API key for the Slack workspace, or null if not found.
  */
-const getSlackApiKey = async (
+const getSlackApiKey = async(
   iris: Iris,
   teamId: string | undefined,
   enterpriseId: string | undefined,
@@ -185,7 +192,7 @@ const getSlackApiKey = async (
  * @param serverId - The ID of the Discord server the message is from.
  * @returns The API key for the Discord server, or null if not found.
  */
-const getDiscordApiKey = async (
+const getDiscordApiKey = async(
   iris: Iris,
   serverId: string,
 ): Promise<string | null> => {
@@ -208,4 +215,9 @@ const getDiscordApiKey = async (
   return projectId;
 };
 
-export { getSlackApiKey, getDiscordApiKey, getSlackAuthHeaders, getDiscordAuthHeaders };
+export {
+  getSlackApiKey,
+  getDiscordApiKey,
+  getSlackAuthHeaders,
+  getDiscordAuthHeaders,
+};

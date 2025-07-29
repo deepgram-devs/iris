@@ -15,7 +15,7 @@ import type { Iris } from "../interfaces/iris.js";
 import type { MinimalSlackMessage } from "../interfaces/minimalSlackMessage.js";
 import type { Message } from "discord.js";
 
-const makeAiRequest = async (
+const makeAiRequest = async(
   iris: Iris,
   messages: Array<{ role: string; content: string }>,
   headers: Headers,
@@ -25,13 +25,13 @@ const makeAiRequest = async (
       "https://gnosis-staging.fly.dev/v1/chat/completions",
       {
         body: JSON.stringify({
-          messages: messages,
-          model: "gpt-4o",
+          messages:        messages,
+          model:           "gpt-4o",
           response_format: { type: "text" },
-          temperature: 1,
+          temperature:     1,
         }),
         headers: headers,
-        method: "POST",
+        method:  "POST",
       },
     );
     if (!request.ok) {
@@ -79,7 +79,7 @@ const makeAiRequest = async (
  * @param token - The Slack bot token to authenticate the request with.
  * @returns The response from Gnosis.
  */
-const makeAiRequestOnSlack = async (
+const makeAiRequestOnSlack = async(
   iris: Iris,
   messages: Array<MinimalSlackMessage>,
   channelName: string,
@@ -98,7 +98,7 @@ const makeAiRequestOnSlack = async (
   const allMessages = [
     {
       content: generatePrompt(username, "slack"),
-      role: "system",
+      role:    "system",
     },
     ...formattedMessages,
   ];
@@ -116,7 +116,7 @@ const makeAiRequestOnSlack = async (
  * @param headers - The authentication headers for the Gnosis API.
  * @returns The response from Gnosis.
  */
-const makeAiRequestOnDiscord = async (
+const makeAiRequestOnDiscord = async(
   iris: Iris,
   messages: Array<Message<true>>,
   channelName: string,
@@ -134,7 +134,7 @@ const makeAiRequestOnDiscord = async (
   const allMessages = [
     {
       content: generatePrompt(username, "discord"),
-      role: "system",
+      role:    "system",
     },
     ...formattedMessages,
   ];

@@ -18,7 +18,7 @@ import type { Message } from "discord.js";
  * @param iris - Iris's instance.
  * @param message - The message payload from Discord.
  */
-export const handleMessageCreate = async (
+export const handleMessageCreate = async(
   iris: Iris,
   message: Message,
 ): Promise<void> => {
@@ -43,14 +43,14 @@ export const handleMessageCreate = async (
     if (!message.channel.isThread()) {
       const result = await makeAiRequestOnDiscord(
         iris,
-        [message],
+        [ message ],
         message.channel.name,
         message.author.displayName,
         authHeaders,
       );
       const thread = await message.startThread({
         autoArchiveDuration: 60,
-        name: `Thread for ${message.author.username}`,
+        name:                `Thread for ${message.author.username}`,
       });
       await thread.send(appendFeedbackButtons(result));
       return;
@@ -60,7 +60,7 @@ export const handleMessageCreate = async (
     });
     const result = await makeAiRequestOnDiscord(
       iris,
-      Array.from(previousMessages.values()),
+      [ ...previousMessages.values() ],
       message.channel.name,
       message.author.displayName,
       authHeaders,

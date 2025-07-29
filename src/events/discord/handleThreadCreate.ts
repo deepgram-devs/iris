@@ -12,7 +12,7 @@ import { makeAiRequestOnDiscord } from "../../utils/makeAiRequest.js";
 import type { Iris } from "../../interfaces/iris.js";
 import type { AnyThreadChannel } from "discord.js";
 
-const sleep = async (ms: number): Promise<void> => {
+const sleep = async(ms: number): Promise<void> => {
   await new Promise((resolve) => {
     // eslint-disable-next-line no-promise-executor-return -- This is a simple sleep function.
     return setTimeout(resolve, ms);
@@ -25,7 +25,7 @@ const sleep = async (ms: number): Promise<void> => {
  * @param iris - Iris's instance.
  * @param thread - The thread payload from Discord.
  */
-export const handleThreadCreate = async (
+export const handleThreadCreate = async(
   iris: Iris,
   thread: AnyThreadChannel,
 ): Promise<void> => {
@@ -54,7 +54,7 @@ export const handleThreadCreate = async (
 
     const result = await makeAiRequestOnDiscord(
       iris,
-      [starter],
+      [ starter ],
       thread.parent?.name ?? "Unknown Channel",
       starter.author.displayName,
       authHeaders,

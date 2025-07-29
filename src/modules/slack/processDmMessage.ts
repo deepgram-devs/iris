@@ -26,7 +26,7 @@ import type {
  * @param teamId - The ID of the Slack team (workspace) the message is from.
  * @param enterpriseId - The ID of the Slack enterprise (if applicable).
  */
-export const processSlackDmMessage = async (
+export const processSlackDmMessage = async(
   iris: Iris,
   message: GenericMessageEvent | FileShareMessageEvent,
   say: SayFn,
@@ -43,7 +43,7 @@ export const processSlackDmMessage = async (
     const botToken = await getWorkspaceBotToken(iris, teamId, enterpriseId);
     const { user } = await iris.slack.client.users.info({
       token: botToken,
-      user: message.user,
+      user:  message.user,
     });
 
     let authHeaders: Headers = new Headers();
@@ -53,8 +53,8 @@ export const processSlackDmMessage = async (
       await iris.slack.client.chat.postMessage({
         channel: message.channel,
         // eslint-disable-next-line stylistic/max-len -- Long string.
-        text: "I could not determine how to authenticate this request. Please try again.",
-        token: botToken,
+        text:    "I could not determine how to authenticate this request. Please try again.",
+        token:   botToken,
       });
       return;
     }
@@ -64,29 +64,29 @@ export const processSlackDmMessage = async (
     const channelName = "Direct Messages";
     const response = await makeAiRequestOnSlack(
       iris,
-      [trimSlackMessageFromEvent(message)],
+      [ trimSlackMessageFromEvent(message) ],
       channelName,
       username,
       authHeaders,
       botToken,
     );
     await iris.slack.client.chat.postMessage({
-      blocks: generateFeedbackBlocks(response),
-      channel: message.channel,
-      text: response,
+      blocks:    generateFeedbackBlocks(response),
+      channel:   message.channel,
+      text:      response,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
       thread_ts: message.ts,
-      token: botToken,
+      token:     botToken,
     });
   } catch (error) {
     await errorHandler(
       iris,
       {
-        error: error,
-        message: "Error in processSlackDmMessage",
+        error:          error,
+        message:        "Error in processSlackDmMessage",
         slackChannelId: message.channel,
-        slackThreadTs: message.ts,
-        teamId: teamId,
+        slackThreadTs:  message.ts,
+        teamId:         teamId,
       },
       {
         manuallySend: true,

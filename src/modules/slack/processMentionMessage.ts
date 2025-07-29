@@ -27,7 +27,7 @@ import type {
  * @param teamId - The ID of the Slack team (workspace) the message is from.
  * @param enterpriseId - The ID of the Slack enterprise (if applicable).
  */
-export const processSlackMentionMessage = async (
+export const processSlackMentionMessage = async(
   iris: Iris,
   message: GenericMessageEvent | FileShareMessageEvent,
   say: SayFn,
@@ -44,7 +44,7 @@ export const processSlackMentionMessage = async (
     const botToken = await getWorkspaceBotToken(iris, teamId, enterpriseId);
     const { user } = await iris.slack.client.users.info({
       token: botToken,
-      user: message.user,
+      user:  message.user,
     });
     let authHeaders: Headers = new Headers();
     try {
@@ -63,34 +63,34 @@ export const processSlackMentionMessage = async (
       = user?.profile?.display_name ?? user?.real_name ?? "Unknown User";
     const channelInfo = await iris.slack.client.conversations.info({
       channel: message.channel,
-      token: botToken,
+      token:   botToken,
     });
     const channelName = channelInfo.channel?.name ?? "Unknown Public Channel";
     const response = await makeAiRequestOnSlack(
       iris,
-      [trimSlackMessageFromEvent(message)],
+      [ trimSlackMessageFromEvent(message) ],
       channelName,
       username,
       authHeaders,
       botToken,
     );
     await iris.slack.client.chat.postMessage({
-      blocks: generateFeedbackBlocks(response),
-      channel: message.channel,
-      text: response,
+      blocks:    generateFeedbackBlocks(response),
+      channel:   message.channel,
+      text:      response,
       // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
       thread_ts: message.ts,
-      token: botToken,
+      token:     botToken,
     });
   } catch (error) {
     await errorHandler(
       iris,
       {
-        error: error,
-        message: "Error in processSlackMentionMessage",
+        error:          error,
+        message:        "Error in processSlackMentionMessage",
         slackChannelId: message.channel,
-        slackThreadTs: message.ts,
-        teamId: teamId,
+        slackThreadTs:  message.ts,
+        teamId:         teamId,
       },
       {
         manuallySend: true,
