@@ -758,6 +758,9 @@ export type Database = {
           bot_scopes: string | null
           bot_token: string | null
           bot_user_id: string | null
+          dg_api_key: string | null
+          dg_key_expiry: string | null
+          dg_project_id: string | null
           enterprise: boolean
           enterprise_id: string | null
           enterprise_name: string | null
@@ -776,6 +779,9 @@ export type Database = {
           bot_scopes?: string | null
           bot_token?: string | null
           bot_user_id?: string | null
+          dg_api_key?: string | null
+          dg_key_expiry?: string | null
+          dg_project_id?: string | null
           enterprise?: boolean
           enterprise_id?: string | null
           enterprise_name?: string | null
@@ -794,6 +800,9 @@ export type Database = {
           bot_scopes?: string | null
           bot_token?: string | null
           bot_user_id?: string | null
+          dg_api_key?: string | null
+          dg_key_expiry?: string | null
+          dg_project_id?: string | null
           enterprise?: boolean
           enterprise_id?: string | null
           enterprise_name?: string | null
