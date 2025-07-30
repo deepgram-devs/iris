@@ -40,7 +40,15 @@ export class Store {
   };
   public fetchInstallation = async(
     installQuery: InstallationQuery<boolean>,
-  ): Promise<Installation> => {
+  ): Promise<
+    Installation & {
+      deepgram?: {
+        projectId?:        string;
+        apiKey?:           string;
+        apiKeyExpiration?: string;
+      };
+    }
+  > => {
     const { data, error } = installQuery.isEnterpriseInstall
       ? await this.database.
         from("slack_installs").
@@ -90,6 +98,11 @@ export class Store {
         token:  data.bot_token ?? "",
         userId: data.bot_user_id ?? "",
       },
+      deepgram: {
+        apiKey:           data.dg_api_key ?? "",
+        apiKeyExpiration: data.dg_key_expiry ?? "",
+        projectId:        data.dg_project_id ?? "",
+      },
       enterprise: {
         id:   data.enterprise_id ?? "",
         name: data.enterprise_name ?? "",
@@ -126,6 +139,9 @@ export class Store {
         bot_scopes:      installation.bot?.scopes.join(",") ?? null,
         bot_token:       installation.bot?.token ?? null,
         bot_user_id:     installation.bot?.userId ?? null,
+        dg_api_key:      installation.deepgram?.apiKey ?? null,
+        dg_key_expiry:   installation.deepgram?.apiKeyExpiration ?? null,
+        dg_project_id:   installation.deepgram?.projectId ?? null,
         enterprise_id:   installation.enterprise?.id ?? null,
         enterprise_name: installation.enterprise?.name ?? null,
         team_id:         installation.team?.id ?? null,
