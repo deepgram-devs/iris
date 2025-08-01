@@ -138,6 +138,14 @@ const processSlackFeedback = async(
     token:     botToken,
     user:      userObject.id,
   });
+  await iris.slack.client.chat.update({
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access -- Too lazy to typeguard.
+    blocks:  (message.blocks ?? []).slice(0, 1),
+    channel: channel?.id ?? "Unknown",
+    text:    message.text ?? "",
+    token:   botToken,
+    ts:      message.ts,
+  });
 };
 
 /**
