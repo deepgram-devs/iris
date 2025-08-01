@@ -18,6 +18,7 @@
   "devDependencies": {
     "@nhcarrigan/eslint-config": "5.2.0",
     "@nhcarrigan/typescript-config": "4.0.0",
+    "@types/node": "24.1.0",
     "@vitest/coverage-istanbul": "3.1.4",
     "eslint": "9.27.0",
     "supabase": "2.31.4",

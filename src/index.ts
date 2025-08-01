@@ -3,15 +3,14 @@
  * @license MIT
  * @author Naomi Carrigan
  */
-import slackBolt, {
-  type InstallationQuery,
-} from "@slack/bolt";
+import slackBolt, { type InstallationQuery } from "@slack/bolt";
 import { Client, GatewayIntentBits } from "discord.js";
 import { Store } from "./database/store.js";
 import { getSupabase } from "./database/supabase.js";
 import { mountDiscordEvents } from "./events/mountDiscordEvents.js";
 import { mountSlackEvents } from "./events/mountSlackEvents.js";
 import { logger } from "./utils/logger.js";
+import { encryptSecret } from "./utils/secrets.js";
 import type { Iris } from "./interfaces/iris.js";
 import type { SlackUser } from "./interfaces/slackUser.js";
 
@@ -52,6 +51,80 @@ const iris: Iris = {
       {
         handler: (request, response): void => {
           const data: Array<Uint8Array> = [];
+          void logger(iris, "Storing Deepgram API key...");
+          request.on("data", (chunk: Uint8Array) => {
+            data.push(chunk);
+          });
+          request.on("error", (error) => {
+            void logger(
+              iris,
+              `Error storing Deepgram API key: ${String(error)}`,
+            );
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- It's a server response.
+            response.writeHead(500, { "Content-Type": "application/json" });
+            response.end(
+              JSON.stringify({ error: "Failed to store Deepgram API key." }),
+            );
+          });
+          request.on("end", () => {
+            const body = Buffer.concat(data).toString();
+            // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- body is a string, but we need to parse it as JSON.
+            const json = JSON.parse(body) as {
+              key:       string;
+              projectId: string;
+              expiry:    string;
+            };
+            const result = encryptSecret(iris, json.key);
+            if (!result) {
+              void logger(iris, "Failed to encrypt Deepgram API key.");
+              // eslint-disable-next-line @typescript-eslint/naming-convention -- It's a server response.
+              response.writeHead(500, { "Content-Type": "application/json" });
+              response.end(
+                JSON.stringify(
+                  { error: "Failed to encrypt Deepgram API key." },
+                ),
+              );
+              return;
+            }
+            const { encrypted, iv, tag } = result;
+            void iris.db.
+              from("iris_keys").
+              upsert({
+                /* eslint-disable @typescript-eslint/naming-convention -- These are all supabase names */
+                dg_project_id:   json.projectId,
+                dg_token:        encrypted,
+                dg_token_expiry: json.expiry,
+                iv:              iv,
+                tag:             tag,
+                /* eslint-enable @typescript-eslint/naming-convention -- Okie dokie. */
+              }).
+              then(({ error }) => {
+                if (error) {
+                  void logger(
+                    iris,
+                    `Failed to store Deepgram API key: ${error.message}`,
+                  );
+                  return;
+                }
+                void logger(iris, "Deepgram API key stored successfully.");
+              });
+
+            // eslint-disable-next-line @typescript-eslint/naming-convention -- It's a server response.
+            response.writeHead(200, { "Content-Type": "application/json" });
+            response.end(
+              JSON.stringify({
+                message: "Deepgram API key stored successfully!",
+              }),
+            );
+            void logger(iris, "Deepgram API key stored successfully.");
+          });
+        },
+        method: "POST",
+        path:   "/dg/token",
+      },
+      {
+        handler: (request, response): void => {
+          const data: Array<Uint8Array> = [];
           void logger(iris, "Storing installation...");
           request.on("data", (chunk: Uint8Array) => {
             data.push(chunk);
@@ -74,6 +147,9 @@ const iris: Iris = {
                 token:  json.access_token,
                 userId: json.bot_user_id,
               },
+              deepgram: {
+                projectId: json.deepgram?.project_id ?? "",
+              },
               enterprise: {
                 id:   json.enterprise?.id ?? "",
                 name: json.enterprise?.name ?? "",
@@ -88,6 +164,7 @@ const iris: Iris = {
                 token:  json.authed_user?.access_token ?? "",
               },
             });
+
             // eslint-disable-next-line @typescript-eslint/naming-convention -- It's a server response.
             response.writeHead(200, { "Content-Type": "text/plain" });
             response.end("Installation stored successfully!");

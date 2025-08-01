@@ -7,7 +7,7 @@
 import { appendFeedbackButtons }
   from "../../modules/discord/appendFeedbackButtons.js";
 import { errorHandler } from "../../utils/errorHandler.js";
-import { getDiscordApiKey } from "../../utils/getApiKey.js";
+import { getDiscordAuthHeaders } from "../../utils/getApiKey.js";
 import { makeAiRequestOnDiscord } from "../../utils/makeAiRequest.js";
 import type { Iris } from "../../interfaces/iris.js";
 import type { AnyThreadChannel } from "discord.js";
@@ -41,8 +41,10 @@ export const handleThreadCreate = async(
       return;
     }
 
-    const apiKey = await getDiscordApiKey(iris, thread.guild.id);
-    if (apiKey === null) {
+    let authHeaders: Headers = new Headers();
+    try {
+      authHeaders = await getDiscordAuthHeaders(iris, thread.guild.id);
+    } catch {
       await starter.reply(
         // eslint-disable-next-line stylistic/max-len -- Long string.
         "Sorry, but I could not determine how to authenticate this request. Please try again.",
@@ -55,7 +57,7 @@ export const handleThreadCreate = async(
       [ starter ],
       thread.parent?.name ?? "Unknown Channel",
       starter.author.displayName,
-      apiKey,
+      authHeaders,
     );
 
     await starter.reply(appendFeedbackButtons(result));

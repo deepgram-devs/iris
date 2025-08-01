@@ -6,7 +6,7 @@
 
 import { errorHandler } from "../../utils/errorHandler.js";
 import { fetchSlackThreadMessages } from "../../utils/fetchThreadMessages.js";
-import { getSlackApiKey } from "../../utils/getApiKey.js";
+import { getSlackAuthHeaders } from "../../utils/getApiKey.js";
 import { getWorkspaceBotToken } from "../../utils/getWorkspaceBotToken.js";
 import { logger } from "../../utils/logger.js";
 import { makeAiRequestOnSlack } from "../../utils/makeAiRequest.js";
@@ -55,8 +55,10 @@ export const processSlackThreadMessage = async(
       token: botToken,
       user:  message.user,
     });
-    const apiKey = await getSlackApiKey(iris, teamId, enterpriseId);
-    if (apiKey === null) {
+    let authHeaders: Headers = new Headers();
+    try {
+      authHeaders = await getSlackAuthHeaders(iris, teamId, enterpriseId);
+    } catch {
       await iris.slack.client.chat.postMessage({
         channel: message.channel,
         // eslint-disable-next-line stylistic/max-len -- Long string.
@@ -94,7 +96,7 @@ export const processSlackThreadMessage = async(
       [ ...parsedPreviousMessages, trimSlackMessageFromEvent(message) ],
       channelName,
       username,
-      apiKey,
+      authHeaders,
       botToken,
     );
     await iris.slack.client.chat.postMessage({

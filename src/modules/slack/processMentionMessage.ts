@@ -5,7 +5,7 @@
  */
 
 import { errorHandler } from "../../utils/errorHandler.js";
-import { getSlackApiKey } from "../../utils/getApiKey.js";
+import { getSlackAuthHeaders } from "../../utils/getApiKey.js";
 import { getWorkspaceBotToken } from "../../utils/getWorkspaceBotToken.js";
 import { logger } from "../../utils/logger.js";
 import { makeAiRequestOnSlack } from "../../utils/makeAiRequest.js";
@@ -46,8 +46,10 @@ export const processSlackMentionMessage = async(
       token: botToken,
       user:  message.user,
     });
-    const apiKey = await getSlackApiKey(iris, teamId, enterpriseId);
-    if (apiKey === null) {
+    let authHeaders: Headers = new Headers();
+    try {
+      authHeaders = await getSlackAuthHeaders(iris, teamId, enterpriseId);
+    } catch {
       await iris.slack.client.chat.postMessage({
         channel: message.channel,
         text:
@@ -69,7 +71,7 @@ export const processSlackMentionMessage = async(
       [ trimSlackMessageFromEvent(message) ],
       channelName,
       username,
-      apiKey,
+      authHeaders,
       botToken,
     );
     await iris.slack.client.chat.postMessage({

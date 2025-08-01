@@ -5,7 +5,7 @@
  */
 
 import { errorHandler } from "../../utils/errorHandler.js";
-import { getSlackApiKey } from "../../utils/getApiKey.js";
+import { getSlackAuthHeaders } from "../../utils/getApiKey.js";
 import { getWorkspaceBotToken } from "../../utils/getWorkspaceBotToken.js";
 import { logger } from "../../utils/logger.js";
 import { makeAiRequestOnSlack } from "../../utils/makeAiRequest.js";
@@ -45,8 +45,11 @@ export const processSlackDmMessage = async(
       token: botToken,
       user:  message.user,
     });
-    const apiKey = await getSlackApiKey(iris, teamId, enterpriseId);
-    if (apiKey === null) {
+
+    let authHeaders: Headers = new Headers();
+    try {
+      authHeaders = await getSlackAuthHeaders(iris, teamId, enterpriseId);
+    } catch {
       await iris.slack.client.chat.postMessage({
         channel: message.channel,
         // eslint-disable-next-line stylistic/max-len -- Long string.
@@ -55,6 +58,7 @@ export const processSlackDmMessage = async(
       });
       return;
     }
+
     const username
       = user?.profile?.display_name ?? user?.real_name ?? "Unknown User";
     const channelName = "Direct Messages";
@@ -63,7 +67,7 @@ export const processSlackDmMessage = async(
       [ trimSlackMessageFromEvent(message) ],
       channelName,
       username,
-      apiKey,
+      authHeaders,
       botToken,
     );
     await iris.slack.client.chat.postMessage({

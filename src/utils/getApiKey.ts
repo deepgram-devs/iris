@@ -3,83 +3,189 @@
  * @license MIT
  * @author Naomi Carrigan
  */
-import {
-  preauthedDiscordServerIds,
-  preauthedSlackWorkspaceIds,
-} from "../config/preauthedCommunities.js";
+import { preauthedSlackWorkspaceIds } from "../config/preauthedCommunities.js";
 import { logger } from "./logger.js";
+import { decryptSecret } from "./secrets.js";
 import type { Iris } from "../interfaces/iris.js";
 
 /**
- * Fetches the API key for a Slack workspace based on the team ID.
+ * Fetches the authentication headers for Gnosis API based on available credentials.
  * @param iris - Iris's instance.
  * @param teamId - The ID of the Slack workspace.
  * @param enterpriseId - The ID of the Slack enterprise (if applicable).
- * @returns The API key for the Slack workspace, or null if not found.
+ * @returns The authentication headers for Gnosis API.
  */
-const getSlackApiKey = async(
+const getSlackAuthHeaders = async(
   iris: Iris,
   teamId: string | undefined,
   enterpriseId: string | undefined,
-): Promise<string | null> => {
-  // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- We know this exists, we would never get here otherwise.
-  return process.env.GNOSIS_TOKEN as string;
-  /* eslint-disable no-unreachable -- temporarily turned off. */
-  // @ts-expect-error -- temporarily turned off.
-  if (
-    // @ts-expect-error -- temporarily turned off.
-    preauthedSlackWorkspaceIds.includes(teamId)
-    // @ts-expect-error -- temporarily turned off.
-    || preauthedSlackWorkspaceIds.includes(enterpriseId)
-  ) {
-    return process.env.GNOSIS_TOKEN ?? null;
-  }
-  const record = await iris.db.
-    from("profiles").
-    select("dg_project_id").
-    // @ts-expect-error -- temporarily turned off.
-    eq("slack_workspace_id", teamId).
-    single();
-  if (record.error) {
+): Promise<Headers> => {
+  const headers = new Headers();
+  headers.set("Content-Type", "application/json");
+
+  try {
+    const installation = await iris.store.fetchInstallation({
+      enterpriseId:        enterpriseId,
+      isEnterpriseInstall: Boolean(enterpriseId),
+      teamId:              teamId ?? "",
+    });
+
+    if (teamId === undefined && enterpriseId === undefined) {
+      throw new Error("Both teamId and enterpriseId are undefined.");
+    }
+
+    if (
+      preauthedSlackWorkspaceIds.includes(teamId ?? enterpriseId ?? "oopsie")
+    ) {
+      headers.set(
+        "Authorization",
+        `token ${process.env.DEEPGRAM_API_KEY ?? "oh no"}`,
+      );
+      await logger(
+        iris,
+        `Using pre-authenticated Deepgram API key for workspace: ${
+          teamId ?? enterpriseId ?? "unknown"
+        }`,
+      );
+      return headers;
+    }
+
+    if (installation.deepgram?.projectId === undefined) {
+      throw new Error(
+        "Installation does not have a Deepgram project ID associated.",
+      );
+    }
+
+    const keyRecord = await iris.db.
+      from("iris_keys").
+      select("*").
+      eq("dg_project_id", installation.deepgram.projectId).
+      single();
+
+    if (keyRecord.error) {
+      throw new Error(
+        `Failed to fetch Deepgram key for project ID ${installation.deepgram.projectId}: ${keyRecord.error.message}`,
+      );
+    }
+
+    const deepgramApiKey = decryptSecret(iris, {
+      encrypted: keyRecord.data.dg_token,
+      iv:        keyRecord.data.iv,
+      tag:       keyRecord.data.tag,
+    });
+
+    // First, check if we have OAuth data with Deepgram API key.
+    if (deepgramApiKey !== null) {
+      await logger(
+        iris,
+        `Using Deepgram API key from OAuth integration - Workspace: ${
+          teamId ?? enterpriseId ?? "unknown"
+        }`,
+      );
+      headers.set("Authorization", `token ${deepgramApiKey}`);
+      return headers;
+    }
+
+    /*
+     * Strategy 2: Client auth for upgraded partners (future implementation)
+     * TODO: Check for client credentials when they're added to SlackUser interface
+     * if (installation.gnosis_client_id && installation.gnosis_client_secret) {
+     *   headers.set("X-Gnosis-Client-ID", installation.gnosis_client_id);
+     *   headers.set("X-Gnosis-Client-Secret", installation.gnosis_client_secret);
+     *   return headers;
+     * }
+     */
+
+    // Strategy 3: Fallback to environment variable
+
+    if (process.env.DEEPGRAM_API_KEY !== undefined) {
+      await logger(
+        iris,
+        `Using fallback DEEPGRAM_API_KEY from environment - Workspace: ${
+          teamId ?? enterpriseId ?? "unknown"
+        }`,
+      );
+      headers.set("Authorization", `token ${process.env.DEEPGRAM_API_KEY}`);
+      return headers;
+    }
+
+    // If no auth method is available, throw error
+    throw new Error("No authentication method available for Gnosis API");
+  } catch (error) {
     await logger(
       iris,
-      // @ts-expect-error -- Early return breaks this.
-      `Error fetching project ID for Slack workspace ${teamId ?? enterpriseId ?? "unknown workspace"}: ${record.error.message}`,
+      `Error getting auth headers for workspace ${
+        teamId ?? enterpriseId ?? "unknown"
+      }: ${String(error)}`,
     );
-    return null;
+    // Return headers with fallback if available
+    if (process.env.DEEPGRAM_API_KEY !== undefined) {
+      headers.set("Authorization", `token ${process.env.DEEPGRAM_API_KEY}`);
+      return headers;
+    }
+    throw error;
   }
-  // @ts-expect-error -- Early return breaks this.
-  const projectId = record.data.dg_project_id;
-  return projectId;
 };
 
 /**
- * Fetches the API key for a Discord server based on the server ID.
+ * Fetches the authentication headers for Gnosis API for Discord servers.
  * @param iris - Iris's instance.
- * @param serverId - The ID of the Discord server the message is from.
- * @returns The API key for the Discord server, or null if not found.
+ * @param serverId - The ID of the Discord server the bot is operating in.
+ * @returns The authentication headers for Gnosis API.
  */
-const getDiscordApiKey = async(
+const getDiscordAuthHeaders = async(
   iris: Iris,
   serverId: string,
-): Promise<string | null> => {
-  if (preauthedDiscordServerIds.includes(serverId)) {
-    return process.env.GNOSIS_TOKEN ?? null;
-  }
-  const record = await iris.db.
-    from("profiles").
-    select("dg_project_id").
-    eq("discord_server_id", serverId).
-    single();
-  if (record.error) {
+): Promise<Headers> => {
+  const headers = new Headers();
+  headers.set("Content-Type", "application/json");
+
+  /*
+   * TODO: Once Discord installations are stored with Deepgram data,
+   * we'll fetch the installation and check for deepgram?.api_key
+   * For now, we'll add a placeholder
+   */
+  try {
+    // This will be installation.deepgram?.api_key.
+    const deepgramApiKey: string | null = null;
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- This will be resolved when we finalise the flow.
+    if (deepgramApiKey !== null) {
+      await logger(
+        iris,
+        "Using Deepgram API key from Discord OAuth integration",
+      );
+      // eslint-disable-next-line @typescript-eslint/restrict-template-expressions -- This will not be type never when we finish implementation.
+      headers.set("Authorization", `Bearer ${deepgramApiKey}`);
+      return headers;
+    }
+
+    // Fallback to environment variable
+    if (process.env.DEEPGRAM_API_KEY !== undefined) {
+      await logger(
+        iris,
+        "Using fallback DEEPGRAM_API_KEY from environment for Discord",
+      );
+      headers.set("Authorization", `Bearer ${process.env.DEEPGRAM_API_KEY}`);
+      return headers;
+    }
+
+    // If no auth method is available, throw error
+    throw new Error("No authentication method available for Gnosis API");
+  } catch (error) {
     await logger(
       iris,
-      `Error fetching project ID for Discord server ${serverId}: ${record.error.message}`,
+      `Error getting auth headers for Discord server ${serverId}: ${String(
+        error,
+      )}`,
     );
-    return null;
+    // Return headers with fallback if available
+    if (process.env.DEEPGRAM_API_KEY !== undefined) {
+      headers.set("Authorization", `Bearer ${process.env.DEEPGRAM_API_KEY}`);
+      return headers;
+    }
+    throw error;
   }
-  const projectId = record.data.dg_project_id;
-  return projectId;
 };
 
-export { getSlackApiKey, getDiscordApiKey };
+export { getSlackAuthHeaders, getDiscordAuthHeaders };

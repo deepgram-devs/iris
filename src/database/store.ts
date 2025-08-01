@@ -5,10 +5,7 @@
  */
 
 import type { Database } from "../interfaces/supabase.js";
-import type {
-  Installation,
-  InstallationQuery,
-} from "@slack/bolt";
+import type { Installation, InstallationQuery } from "@slack/bolt";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 /**
@@ -20,8 +17,7 @@ export class Store {
    * Constructor for the Store class.
    * @param database - The Supabase client instance.
    */
-  public constructor(private readonly database: SupabaseClient<Database>) {
-  }
+  public constructor(private readonly database: SupabaseClient<Database>) {}
 
   public deleteInstallation = async(
     installQuery: InstallationQuery<boolean>,
@@ -44,7 +40,13 @@ export class Store {
   };
   public fetchInstallation = async(
     installQuery: InstallationQuery<boolean>,
-  ): Promise<Installation> => {
+  ): Promise<
+    Installation & {
+      deepgram?: {
+        projectId?: string;
+      };
+    }
+  > => {
     const { data, error } = installQuery.isEnterpriseInstall
       ? await this.database.
         from("slack_installs").
@@ -94,6 +96,9 @@ export class Store {
         token:  data.bot_token ?? "",
         userId: data.bot_user_id ?? "",
       },
+      deepgram: {
+        projectId: data.dg_project_id ?? "",
+      },
       enterprise: {
         id:   data.enterprise_id ?? "",
         name: data.enterprise_name ?? "",
@@ -113,29 +118,32 @@ export class Store {
   };
 
   public storeInstallation = async(
-    installation: Installation,
+    installation: Installation & {
+      deepgram?: {
+        projectId?: string;
+      };
+    },
   ): Promise<void> => {
     const { error } = await this.database.
       from("slack_installs").
-      insert(
-        {
-          /* eslint-disable @typescript-eslint/naming-convention -- These are all supabase names */
-          app_id:          installation.appId ?? null,
-          bot_id:          installation.bot?.id ?? null,
-          bot_scopes:      installation.bot?.scopes.join(",") ?? null,
-          bot_token:       installation.bot?.token ?? null,
-          bot_user_id:     installation.bot?.userId ?? null,
-          enterprise_id:   installation.enterprise?.id ?? null,
-          enterprise_name: installation.enterprise?.name ?? null,
-          team_id:         installation.team?.id ?? null,
-          team_name:       installation.team?.name ?? null,
-          token_type:      installation.tokenType ?? null,
-          user_id:         installation.user.id,
-          user_scopes:     installation.user.scopes?.join(",") ?? null,
-          user_token:      installation.user.token ?? null,
-          /* eslint-enable @typescript-eslint/naming-convention -- All done, turn rule back on! */
-        },
-      ).
+      insert({
+        /* eslint-disable @typescript-eslint/naming-convention -- These are all supabase names */
+        app_id:          installation.appId ?? null,
+        bot_id:          installation.bot?.id ?? null,
+        bot_scopes:      installation.bot?.scopes.join(",") ?? null,
+        bot_token:       installation.bot?.token ?? null,
+        bot_user_id:     installation.bot?.userId ?? null,
+        dg_project_id:   installation.deepgram?.projectId ?? null,
+        enterprise_id:   installation.enterprise?.id ?? null,
+        enterprise_name: installation.enterprise?.name ?? null,
+        team_id:         installation.team?.id ?? null,
+        team_name:       installation.team?.name ?? null,
+        token_type:      installation.tokenType ?? null,
+        user_id:         installation.user.id,
+        user_scopes:     installation.user.scopes?.join(",") ?? null,
+        user_token:      installation.user.token ?? null,
+        /* eslint-enable @typescript-eslint/naming-convention -- All done, turn rule back on! */
+      }).
       select("*").
       single();
     if (error) {
