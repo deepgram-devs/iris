@@ -3,10 +3,9 @@
  * @license MIT
  * @author Naomi Carrigan
  */
-import {
-  preauthedSlackWorkspaceIds,
-} from "../config/preauthedCommunities.js";
+import { preauthedSlackWorkspaceIds } from "../config/preauthedCommunities.js";
 import { logger } from "./logger.js";
+import { decryptSecret } from "./secrets.js";
 import type { Iris } from "../interfaces/iris.js";
 
 /**
@@ -31,6 +30,10 @@ const getSlackAuthHeaders = async(
       teamId:              teamId ?? "",
     });
 
+    if (teamId === undefined && enterpriseId === undefined) {
+      throw new Error("Both teamId and enterpriseId are undefined.");
+    }
+
     if (
       preauthedSlackWorkspaceIds.includes(teamId ?? enterpriseId ?? "oopsie")
     ) {
@@ -47,7 +50,29 @@ const getSlackAuthHeaders = async(
       return headers;
     }
 
-    const deepgramApiKey: string | null = installation.deepgram?.apiKey ?? null;
+    if (installation.deepgram?.projectId === undefined) {
+      throw new Error(
+        "Installation does not have a Deepgram project ID associated.",
+      );
+    }
+
+    const keyRecord = await iris.db.
+      from("iris_keys").
+      select("*").
+      eq("dg_project_id", installation.deepgram.projectId).
+      single();
+
+    if (keyRecord.error) {
+      throw new Error(
+        `Failed to fetch Deepgram key for project ID ${installation.deepgram.projectId}: ${keyRecord.error.message}`,
+      );
+    }
+
+    const deepgramApiKey = decryptSecret(iris, {
+      encrypted: keyRecord.data.dg_token,
+      iv:        keyRecord.data.iv,
+      tag:       keyRecord.data.tag,
+    });
 
     // First, check if we have OAuth data with Deepgram API key.
     if (deepgramApiKey !== null) {

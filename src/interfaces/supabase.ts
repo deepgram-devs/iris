@@ -509,6 +509,30 @@ export type Database = {
         }
         Relationships: []
       }
+      iris_keys: {
+        Row: {
+          dg_project_id: string
+          dg_token: string
+          dg_token_expiry: string
+          iv: string
+          tag: string
+        }
+        Insert: {
+          dg_project_id: string
+          dg_token: string
+          dg_token_expiry: string
+          iv: string
+          tag: string
+        }
+        Update: {
+          dg_project_id?: string
+          dg_token?: string
+          dg_token_expiry?: string
+          iv?: string
+          tag?: string
+        }
+        Relationships: []
+      }
       knowledge_base: {
         Row: {
           answer_href: string | null
@@ -758,8 +782,6 @@ export type Database = {
           bot_scopes: string | null
           bot_token: string | null
           bot_user_id: string | null
-          dg_api_key: string | null
-          dg_key_expiry: string | null
           dg_project_id: string | null
           enterprise: boolean
           enterprise_id: string | null
@@ -779,8 +801,6 @@ export type Database = {
           bot_scopes?: string | null
           bot_token?: string | null
           bot_user_id?: string | null
-          dg_api_key?: string | null
-          dg_key_expiry?: string | null
           dg_project_id?: string | null
           enterprise?: boolean
           enterprise_id?: string | null
@@ -800,8 +820,6 @@ export type Database = {
           bot_scopes?: string | null
           bot_token?: string | null
           bot_user_id?: string | null
-          dg_api_key?: string | null
-          dg_key_expiry?: string | null
           dg_project_id?: string | null
           enterprise?: boolean
           enterprise_id?: string | null

@@ -14,7 +14,7 @@ import type { KnownEventFromType } from "@slack/bolt";
  */
 const isSlackMessageInThread = (
   message: KnownEventFromType<"message">,
-// eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
+  // eslint-disable-next-line @typescript-eslint/naming-convention -- API convention.
 ): message is KnownEventFromType<"message"> & { thread_ts: string } => {
   return (
     "thread_ts" in message
@@ -32,8 +32,31 @@ const isSlackMessageInThread = (
 const isPropertyInPlatformSyntaxObject = (
   platform: keyof typeof platformSyntax,
   property: string,
-): property is keyof typeof platformSyntax[typeof platform] => {
+): property is keyof (typeof platformSyntax)[typeof platform] => {
   return property in platformSyntax[platform];
 };
 
-export { isSlackMessageInThread, isPropertyInPlatformSyntaxObject };
+/**
+ * Confirms that the JSON object received from Supabase is a proper
+ * encryption payload.
+ * @param object - The object to check.
+ * @returns True if the object is a valid encryption payload, false otherwise.
+ */
+const isEncryptionObject = (
+  object: unknown,
+): object is { encrypted: string; iv: string; tag: string } => {
+  return (
+    typeof object === "object"
+    && object !== null
+    && !Array.isArray(object)
+    && "encrypted" in object
+    && "iv" in object
+    && "tag" in object
+  );
+};
+
+export {
+  isSlackMessageInThread,
+  isPropertyInPlatformSyntaxObject,
+  isEncryptionObject,
+};
