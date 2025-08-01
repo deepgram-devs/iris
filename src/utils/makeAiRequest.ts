@@ -36,6 +36,9 @@ const makeAiRequest = async(
     );
     if (!request.ok) {
       const errorResponse = await request.text();
+      if (errorResponse.includes("Authentication required")) {
+        void logger(iris, `Authentication failed with headers: ${JSON.stringify(Object.fromEntries(headers.entries()))}`);
+      }
       throw new Error(errorResponse);
     }
     // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- JSON doesn't accept a generic.
