@@ -16,4 +16,13 @@ const preauthedDiscordServerIds: Array<string> = [];
  */
 const preauthedSlackWorkspaceIds: Array<string> = [];
 
-export { preauthedDiscordServerIds, preauthedSlackWorkspaceIds };
+/**
+ * Our dedicated Slack workspace that does not require a Slack token.
+ */
+const homeSlackWorkspaceId = "T0LL805A9";
+
+export {
+  preauthedDiscordServerIds,
+  preauthedSlackWorkspaceIds,
+  homeSlackWorkspaceId,
+};

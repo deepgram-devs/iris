@@ -3,6 +3,7 @@
  * @license MIT
  * @author Naomi Carrigan
  */
+import { homeSlackWorkspaceId } from "../config/preauthedCommunities.js";
 import { logger } from "./logger.js";
 import type { Iris } from "../interfaces/iris.js";
 
@@ -23,6 +24,14 @@ const getWorkspaceBotToken = async(
     isEnterpriseInstall: enterpriseId !== undefined,
     teamId:              teamId,
   });
+  if (teamId !== undefined && teamId === homeSlackWorkspaceId) {
+    await logger(
+      iris,
+      `Using home Slack workspace token for team ID: ${teamId}`,
+    );
+    // eslint-disable-next-line @typescript-eslint/consistent-type-assertions -- We know this exists, we would never get here otherwise.
+    return process.env.SLACK_BOT_TOKEN as string;
+  }
   if (installation.bot === undefined) {
     await logger(
       iris,
