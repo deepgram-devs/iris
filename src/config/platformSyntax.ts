@@ -6,30 +6,28 @@
 
 export const platformSyntax = {
   discord: {
-    bold:          "**bold text**",
+    block:         "```lang\ncode block\n```",
+    bold:          "**bold**",
     code:          "`code`",
-    codeBlock:     "```\ncode block\n```",
-    // eslint-disable-next-line stylistic/max-len -- Long string.
-    header:        "# Top Level Header\n## Second Level Header\n### Third Level Header",
-    italic:        "_italic text_",
-    links:         "[link description/text](https://example.com)",
+    header:        "# H1, ## H2, ### H3",
+    italic:        "_italic_",
+    link:          "[link](https://url)",
     list:          "- item 1\n- item 2",
     numberedList:  "1. item 1\n2. item 2",
-    quote:         "> This is a quote",
+    quote:         "> quote",
     spoiler:       "||spoiler||",
     strikethrough: "~~strikethrough~~",
     underline:     "__underline__",
   },
   slack: {
-    // eslint-disable-next-line stylistic/max-len -- Long string.
-    bold:          "*bold text* - DO NOT USE TWO ASTERISKS SLACK WILL NOT RENDER IT",
+    block:         "```\ncode block\n```",
+    bold:          "*bold*",
     code:          "`code`",
-    codeBlock:     "```\ncode block\n```",
-    italic:        "_italic text_",
-    links:         "<https://example.com|link description/text>",
+    italic:        "_italic_",
+    link:          "<https://url|link>",
     list:          "- item 1\n- item 2",
     numberedList:  "1. item 1\n2. item 2",
-    quote:         "> This is a quote",
+    quote:         "> quote",
     strikethrough: "~strikethrough~",
   },
 };
