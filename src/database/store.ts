@@ -124,28 +124,57 @@ export class Store {
       };
     },
   ): Promise<void> => {
-    const { error } = await this.database.
-      from("slack_installs").
-      insert({
+    const { error } = installation.isEnterpriseInstall === true
+      ? await this.database.
+        from("slack_installs").
+        upsert({
         /* eslint-disable @typescript-eslint/naming-convention -- These are all supabase names */
-        app_id:          installation.appId ?? null,
-        bot_id:          installation.bot?.id ?? null,
-        bot_scopes:      installation.bot?.scopes.join(",") ?? null,
-        bot_token:       installation.bot?.token ?? null,
-        bot_user_id:     installation.bot?.userId ?? null,
-        dg_project_id:   installation.deepgram?.projectId ?? null,
-        enterprise_id:   installation.enterprise?.id ?? null,
-        enterprise_name: installation.enterprise?.name ?? null,
-        team_id:         installation.team?.id ?? null,
-        team_name:       installation.team?.name ?? null,
-        token_type:      installation.tokenType ?? null,
-        user_id:         installation.user.id,
-        user_scopes:     installation.user.scopes?.join(",") ?? null,
-        user_token:      installation.user.token ?? null,
+          app_id:          installation.appId ?? null,
+          bot_id:          installation.bot?.id ?? null,
+          bot_scopes:      installation.bot?.scopes.join(",") ?? null,
+          bot_token:       installation.bot?.token ?? null,
+          bot_user_id:     installation.bot?.userId ?? null,
+          dg_project_id:   installation.deepgram?.projectId ?? null,
+          enterprise_id:   installation.enterprise?.id ?? null,
+          enterprise_name: installation.enterprise?.name ?? null,
+          team_id:         installation.team?.id ?? null,
+          team_name:       installation.team?.name ?? null,
+          token_type:      installation.tokenType ?? null,
+          user_id:         installation.user.id,
+          user_scopes:     installation.user.scopes?.join(",") ?? null,
+          user_token:      installation.user.token ?? null,
         /* eslint-enable @typescript-eslint/naming-convention -- All done, turn rule back on! */
-      }).
-      select("*").
-      single();
+        }, {
+          ignoreDuplicates: false,
+          onConflict:       "enterprise_id",
+        }).
+        select("*").
+        single()
+      : await this.database.
+        from("slack_installs").
+        upsert({
+        /* eslint-disable @typescript-eslint/naming-convention -- These are all supabase names */
+          app_id:          installation.appId ?? null,
+          bot_id:          installation.bot?.id ?? null,
+          bot_scopes:      installation.bot?.scopes.join(",") ?? null,
+          bot_token:       installation.bot?.token ?? null,
+          bot_user_id:     installation.bot?.userId ?? null,
+          dg_project_id:   installation.deepgram?.projectId ?? null,
+          enterprise_id:   installation.enterprise?.id ?? null,
+          enterprise_name: installation.enterprise?.name ?? null,
+          team_id:         installation.team?.id ?? null,
+          team_name:       installation.team?.name ?? null,
+          token_type:      installation.tokenType ?? null,
+          user_id:         installation.user.id,
+          user_scopes:     installation.user.scopes?.join(",") ?? null,
+          user_token:      installation.user.token ?? null,
+        /* eslint-enable @typescript-eslint/naming-convention -- All done, turn rule back on! */
+        }, {
+          ignoreDuplicates: false,
+          onConflict:       "team_id",
+        }).
+        select("*").
+        single();
     if (error) {
       // eslint-disable-next-line no-console -- We cannot use our normal logger here because it requires the Iris instance.
       console.error("Failed to store installation:", error);
