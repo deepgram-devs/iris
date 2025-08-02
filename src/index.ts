@@ -97,10 +97,6 @@ const iris: Iris = {
                 iv:              iv,
                 tag:             tag,
                 /* eslint-enable @typescript-eslint/naming-convention -- Okie dokie. */
-              },
-              {
-                ignoreDuplicates: false,
-                onConflict:       "dg_project_id",
               }).
               then(({ error }) => {
                 if (error) {
