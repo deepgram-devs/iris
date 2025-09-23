@@ -63,11 +63,11 @@ export const errorHandler = async(
   },
 ): Promise<void> => {
   const id = new ShortUniqueId({ length: 16 }).rnd();
-  await logger(iris, `Error ID: ${id}`);
-  await logger(iris, data.message);
+  await logger(iris, `Error ID: ${id}`, true);
+  await logger(iris, data.message, true);
   if (data.error instanceof Error) {
-    await logger(iris, `Error message: ${data.error.message}`);
-    await logger(iris, `Error stack: ${data.error.stack ?? "No stack trace"}`);
+    await logger(iris, `Error message: ${data.error.message}`, true);
+    await logger(iris, `Error stack: ${data.error.stack ?? "No stack trace"}`, true);
   }
   if (functions.manuallySend === true) {
     const botToken = data.teamId === undefined
